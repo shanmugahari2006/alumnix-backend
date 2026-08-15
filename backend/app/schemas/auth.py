@@ -1,5 +1,5 @@
 import re
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field, field_validator, model_validator
 
 EMAIL_REGEX = re.compile(r"^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$")
 
@@ -16,15 +16,7 @@ class UserRegister(BaseModel):
             raise ValueError("Invalid email format")
         return v
 
-class StudentRegister(UserRegister):
-    roll_number: str = Field(..., min_length=1)
-    branch: str = Field(..., min_length=1)
-    graduation_year: int = Field(..., ge=1900, le=2100)
 
-class AlumniRegister(UserRegister):
-    graduation_year: int = Field(..., ge=1900, le=2100)
-    company: str = Field(..., min_length=1)
-    designation: str = Field(..., min_length=1)
 
 class UserLogin(BaseModel):
     email: str = Field(...)
@@ -61,14 +53,15 @@ import uuid
 from typing import Optional
 
 class StudentProfileResponse(BaseModel):
-    roll_number: str
+    usn: str
     branch: str
     graduation_year: int
     model_config = {"from_attributes": True}
 
 class AlumniProfileResponse(BaseModel):
-    company: str
-    designation: str
+    usn: Optional[str] = None
+    company: Optional[str] = None
+    designation: Optional[str] = None
     graduation_year: int
     is_approved: bool
     model_config = {"from_attributes": True}
@@ -78,13 +71,18 @@ class FacultyProfileResponse(BaseModel):
     employee_id: str
     department: str
     designation: str
+    is_approved: bool
     model_config = {"from_attributes": True}
+
+from app.models.user import UserRole, AuthProviderType
 
 class UserResponse(BaseModel):
     id: uuid.UUID
-    email: str
+    email: Optional[str] = None
+    phone_number: Optional[str] = None
+    avatar_url: Optional[str] = None
     full_name: str
-    role: str
+    role: UserRole
     is_active: bool
     model_config = {"from_attributes": True}
 
@@ -98,13 +96,74 @@ class AlumniUserResponse(BaseModel):
 
 class UserMeResponse(BaseModel):
     id: uuid.UUID
-    email: str
+    email: Optional[str] = None
+    phone_number: Optional[str] = None
+    avatar_url: Optional[str] = None
     full_name: str
-    role: str
+    role: UserRole
     is_active: bool
     student_profile: Optional[StudentProfileResponse] = None
     alumni_profile: Optional[AlumniProfileResponse] = None
     faculty_profile: Optional[FacultyProfileResponse] = None
     model_config = {"from_attributes": True}
+
+class PhoneOTPRequest(BaseModel):
+    phone_number: str = Field(..., min_length=1, description="Phone number to send OTP to")
+
+class PhoneOTPVerify(BaseModel):
+    phone_number: str = Field(..., min_length=1, description="Registered phone number")
+    otp_code: str = Field(..., min_length=4, max_length=8, description="Verification OTP code received")
+
+class ForgotPasswordRequest(BaseModel):
+    email: Optional[str] = None
+    phone_number: Optional[str] = None
+
+    @model_validator(mode="after")
+    def check_identifier(self) -> "ForgotPasswordRequest":
+        if not self.email and not self.phone_number:
+            raise ValueError("Either email or phone_number must be provided")
+        if self.email and self.phone_number:
+            raise ValueError("Provide either email or phone_number, not both")
+        return self
+
+class ResetPasswordRequest(BaseModel):
+    email: Optional[str] = None
+    phone_number: Optional[str] = None
+    code: str = Field(..., min_length=4, max_length=8, description="Reset code or OTP code")
+    new_password: str = Field(..., min_length=8, description="New account password")
+
+    @model_validator(mode="after")
+    def check_identifier(self) -> "ResetPasswordRequest":
+        if not self.email and not self.phone_number:
+            raise ValueError("Either email or phone_number must be provided")
+        if self.email and self.phone_number:
+            raise ValueError("Provide either email or phone_number, not both")
+        return self
+
+class VerifyUSNRequest(BaseModel):
+    usn: str = Field(..., min_length=1, description="Student/Alumni University Seat Number")
+    role: UserRole = Field(..., description="Role to verify against the registry (student or alumni)")
+
+class VerifyUSNResponse(BaseModel):
+    full_name: str
+
+class SendSocialOTPRequest(BaseModel):
+    usn: str = Field(..., min_length=1)
+    channel: str = Field(..., description="Channel to send OTP to ('email' or 'phone')")
+
+class VerifySocialOTPRequest(BaseModel):
+    usn: str = Field(..., min_length=1)
+    channel: str = Field(..., description="Channel the OTP was sent to ('email' or 'phone')")
+    otp_code: str = Field(..., min_length=4, max_length=8)
+
+class VerifySocialOTPResponse(BaseModel):
+    verification_token: str
+
+class SetupPasswordRequest(BaseModel):
+    verification_token: str = Field(..., min_length=1)
+    password: str = Field(..., min_length=8)
+
+
+
 
 

@@ -15,8 +15,8 @@ class JobListing(Base):
     job_type = Column(String, nullable=False) # e.g., "Full-time", "Internship"
     salary = Column(String, nullable=True)
     creator_id = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
-    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
-    updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     
     creator = relationship("User")
     applications = relationship("JobApplication", back_populates="job", cascade="all, delete-orphan")
@@ -29,7 +29,7 @@ class JobApplication(Base):
     student_id = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
     resume_url = Column(String, nullable=False)
     status = Column(String, default="applied") # "applied", "shortlisted", "rejected"
-    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    created_at = Column(DateTime, default=datetime.utcnow)
     
     job = relationship("JobListing", back_populates="applications")
     student = relationship("User")

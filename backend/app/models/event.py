@@ -13,7 +13,7 @@ class Event(Base):
     date = Column(DateTime, nullable=False)
     location = Column(String, nullable=False)
     creator_id = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
-    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    created_at = Column(DateTime, default=datetime.utcnow)
     
     creator = relationship("User")
     registrations = relationship("EventRegistration", back_populates="event", cascade="all, delete-orphan")
@@ -24,7 +24,7 @@ class EventRegistration(Base):
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     event_id = Column(UUID(as_uuid=True), ForeignKey("events.id", ondelete="CASCADE"), nullable=False)
     user_id = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
-    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    created_at = Column(DateTime, default=datetime.utcnow)
     
     event = relationship("Event", back_populates="registrations")
     user = relationship("User")
