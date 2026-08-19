@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Razorpay Payment Integration Test</title>
+    <!-- Tailwind CSS for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Razorpay Checkout SDK -->
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    <style>
+        body {
+            background-color: #0f172a;
+            color: #f8fafc;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-6">
+    <div class="w-full max-w-lg bg-slate-800 rounded-2xl shadow-2xl p-8 border border-slate-700">
+        <h1 class="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-500 mb-2">
+            Razorpay Integration Test
+        </h1>
+        <p class="text-slate-400 text-sm mb-6">
+            Verify the full end-to-end checkout pipeline of your deployed FastAPI backend.
+        </p>
+
+        <!-- Form Fields -->
+        <div class="space-y-4">
+            <div>
+                <label class="block text-slate-300 font-semibold text-xs uppercase tracking-wider mb-2">Railway API URL</label>
+                <input id="apiUrl" type="text" value="https://alumnix-backend-production.up.railway.app" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2.5 text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
+            </div>
+
+            <div>
+                <label class="block text-slate-300 font-semibold text-xs uppercase tracking-wider mb-2">Admin/User JWT Token</label>
+                <textarea id="token" rows="3" placeholder="Paste your Bearer token here..." class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2.5 text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm font-mono"></textarea>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-slate-300 font-semibold text-xs uppercase tracking-wider mb-2">Amount (INR)</label>
+                    <input id="amount" type="number" value="500" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2.5 text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
+                </div>
+                <div>
+                    <label class="block text-slate-300 font-semibold text-xs uppercase tracking-wider mb-2">Purpose</label>
+                    <input id="purpose" type="text" value="Scholarships" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2.5 text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="pt-4 space-y-3">
+                <button onclick="createOrder()" class="w-full bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-750 text-white font-bold py-3 rounded-lg shadow-lg hover:shadow-indigo-500/20 transition-all duration-300 transform active:scale-[0.98]">
+                    Step 1: Create Order
+                </button>
+                <button id="payBtn" disabled onclick="payWithRazorpay()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-lg shadow-lg disabled:opacity-40 disabled:pointer-events-none transition-all duration-300 transform active:scale-[0.98]">
+                    Step 2: Pay with Razorpay
+                </button>
+            </div>
+        </div>
+
+        <!-- Terminal Logs -->
+        <div class="mt-8">
+            <h3 class="text-slate-300 font-semibold text-xs uppercase tracking-wider mb-2">Execution Logs</h3>
+            <div id="logs" class="w-full h-44 bg-slate-950 rounded-lg border border-slate-800 p-4 font-mono text-xs overflow-y-auto space-y-2 text-emerald-400">
+                <div class="text-slate-500">> Waiting for user actions...</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let orderDetails = null;
+
+        function log(message, type = 'info') {
+            const logsDiv = document.getElementById('logs');
+            const time = new Date().toLocaleTimeString();
+            const colorClass = type === 'error' ? 'text-red-400' : type === 'success' ? 'text-emerald-400' : 'text-blue-400';
+            
+            const logEntry = document.createElement('div');
+            logEntry.className = colorClass;
+            logEntry.innerHTML = `<span class="text-slate-600">[${time}]</span> ${message}`;
+            logsDiv.appendChild(logEntry);
+            logsDiv.scrollTop = logsDiv.scrollHeight;
+        }
+
+        async function createOrder() {
+            const apiUrl = document.getElementById('apiUrl').value.trim();
+            const token = document.getElementById('token').value.trim();
+            const amount = parseFloat(document.getElementById('amount').value);
+            const purpose = document.getElementById('purpose').value.trim();
+
+            if (!token) {
+                log("Error: JWT Token cannot be empty!", "error");
+                return;
+            }
+
+            log("Calling create-order endpoint...");
+            
+            try {
+                const response = await fetch(`${apiUrl}/api/v1/donations/create-order`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ amount, purpose })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.detail || "Request failed");
+                }
+
+                orderDetails = data;
+                log(`Success! Created Order: <b>${data.order_id}</b>`, "success");
+                log(`Razorpay Public Key: <b>${data.key_id}</b>`, "info");
+                
+                // Enable the Pay Button
+                document.getElementById('payBtn').disabled = false;
+            } catch (err) {
+                log(`Order Creation Failed: ${err.message}`, "error");
+            }
+        }
+
+        function payWithRazorpay() {
+            if (!orderDetails) return;
+
+            log("Initializing Razorpay checkout popup...");
+
+            const options = {
+                key: orderDetails.key_id,
+                amount: orderDetails.amount * 100, // converted back to paise for local verification
+                currency: "INR",
+                name: "AlumniConnect Portal",
+                description: "Test Donation Payment",
+                order_id: orderDetails.order_id,
+                handler: async function (response) {
+                    log("Payment approved by user! Verifying signature...", "success");
+                    log(`Payment ID: ${response.razorpay_payment_id}`);
+                    log(`Signature: ${response.razorpay_signature}`);
+                    
+                    await verifyPayment(response);
+                },
+                modal: {
+                    ondismiss: function () {
+                        log("Payment modal dismissed by user.", "error");
+                    }
+                },
+                theme: {
+                    color: "#3b82f6"
+                }
+            };
+
+            const rzp = new Razorpay(options);
+            rzp.open();
+        }
+
+        async function verifyPayment(rzpResponse) {
+            const apiUrl = document.getElementById('apiUrl').value.trim();
+            const token = document.getElementById('token').value.trim();
+
+            log("Calling verify endpoint...");
+
+            try {
+                const response = await fetch(`${apiUrl}/api/v1/donations/verify`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        razorpay_order_id: rzpResponse.razorpay_order_id,
+                        razorpay_payment_id: rzpResponse.razorpay_payment_id,
+                        razorpay_signature: rzpResponse.razorpay_signature
+                    })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.detail || "Verification failed");
+                }
+
+                log(`Payment verified successfully! Status: <b>${data.status}</b>`, "success");
+                log(`Message: ${data.message}`, "success");
+                
+                // Disable payment button again
+                document.getElementById('payBtn').disabled = true;
+            } catch (err) {
+                log(`Payment Verification Failed: ${err.message}`, "error");
+            }
+        }
+    </script>
+</body>
+</html>
