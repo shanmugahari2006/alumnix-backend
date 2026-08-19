@@ -1,0 +1,28 @@
+services:
+  - type: web
+    name: alumniconnect-backend
+    env: docker
+    dockerfilepath: Dockerfile
+    dockerContext: .
+    plan: free
+    port: 8000
+    envVars:
+      - key: DATABASE_URL
+        sync: false
+        description: "Supabase PostgreSQL Connection URL (e.g. postgresql+asyncpg://...)"
+      - key: JWT_SECRET
+        generateValue: true
+      - key: ALGORITHM
+        value: HS256
+      - key: ACCESS_TOKEN_EXPIRE_MINUTES
+        value: "30"
+      - key: REFRESH_TOKEN_EXPIRE_DAYS
+        value: "365"
+      - key: RAZORPAY_KEY_ID
+        sync: false
+      - key: RAZORPAY_KEY_SECRET
+        sync: false
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_KEY
+        sync: false

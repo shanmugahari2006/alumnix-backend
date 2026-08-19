@@ -7,6 +7,9 @@ from app.routes.alumni import router as alumni_router
 from app.routes.jobs import router as jobs_router
 from app.routes.events import router as events_router
 from app.routes.stories import router as stories_router
+from app.routes.donations import router as donations_router
+from app.routes.uploads import router as uploads_router
+from app.routes.admin import router as admin_router
 from app.database import engine, Base
 import app.models  # Import to register models on Base.metadata
 
@@ -86,6 +89,9 @@ app.include_router(alumni_router, prefix="/api/v1/alumni", tags=["Alumni Directo
 app.include_router(jobs_router, prefix="/api/v1/jobs", tags=["Job Portal"])
 app.include_router(events_router, prefix="/api/v1/events", tags=["Events"])
 app.include_router(stories_router, prefix="/api/v1/stories", tags=["Success Stories"])
+app.include_router(donations_router, prefix="/api/v1/donations", tags=["Donations"])
+app.include_router(uploads_router, prefix="/api/v1/upload", tags=["Uploads"])
+app.include_router(admin_router, prefix="/api/v1/admin", tags=["Admin"])
 
 @app.get("/health")
 async def health_check():

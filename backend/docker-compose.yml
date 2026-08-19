@@ -1,0 +1,48 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: alumniconnect_db
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: DB_Password_1234
+      POSTGRES_DB: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: alumniconnect_backend
+    restart: always
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://postgres:DB_Password_1234@db:5432/postgres
+      - JWT_SECRET=b811d685e4a6f2384ec21a3f4e3516d8b2aad6c4cd04f07fe3aaad2645ce458e
+      - ALGORITHM=HS256
+      - ACCESS_TOKEN_EXPIRE_MINUTES=30
+      - REFRESH_TOKEN_EXPIRE_DAYS=365
+      - RAZORPAY_KEY_ID=your_razorpay_key_id
+      - RAZORPAY_KEY_SECRET=your_razorpay_key_secret
+      - TWILIO_ACCOUNT_SID=
+      - TWILIO_AUTH_TOKEN=
+      - TWILIO_PHONE_NUMBER=
+      - SUPABASE_URL=https://tnmtkvpsgsxsofdeuqna.supabase.co/rest/v1/
+      - SUPABASE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRubXRrdnBzZ3N4c29mZGV1cW5hIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODY3NzI3NzgsImV4cCI6MjEwMjM0ODc3OH0.SLXevQOSz2FXZ5C8DZhWN9qt5Xo0NWrqzivN_DIy9sc
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  postgres_data:
