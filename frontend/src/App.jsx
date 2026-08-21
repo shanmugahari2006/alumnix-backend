@@ -185,7 +185,7 @@ function Overview({ user, goTo, request }) {
 }
 
 function Directory({ user, request, onStartChat }) {
-  const [filters, setFilters] = useState({ query: '', branch: '', graduation_year: '', location: '', skills: '' }); const [data, setData] = useState({ results: [], total: 0 }); const [state, setState] = useState({ loading: true, error: '' }); const [editing, setEditing] = useState(false); const [profile, setProfile] = useState({ company: '', designation: '', location: '', linkedin_url: '', skills: '', branch: '' });
+  const [filters, setFilters] = useState({ query: '', branch: '', graduation_year: '', location: '', skills: '' }); const [data, setData] = useState({ results: [], total: 0 }); const [state, setState] = useState({ loading: true, error: '' });
   const load = useCallback(async () => {
     setState({ loading: true, error: '' });
     try {
@@ -221,8 +221,7 @@ function Directory({ user, request, onStartChat }) {
     }
     setState({ loading: false, error: '' });
   }, [filters, request]); useEffect(() => { load(); }, []);
-  const saveProfile = async (event) => { event.preventDefault(); try { await request('/api/v1/alumni/profile', { method: 'PUT', body: JSON.stringify({ ...profile, skills: profile.skills.split(',').map((item) => item.trim()).filter(Boolean) }) }); setEditing(false); } catch (err) { setState((s) => ({ ...s, error: err.message })); } };
-  return <div className="page-content"><PageHeader eyebrow="People like you" title="Alumni directory" text="Search the full community by experience, cohort, and shared interests." action={<Button onClick={() => setEditing(true)}><Pencil size={15} /> Edit my profile</Button>} /><div className="filter-bar"><div className="search-input"><Search size={16} /><input value={filters.query} onChange={(e) => setFilters({ ...filters, query: e.target.value })} onKeyDown={(e) => e.key === 'Enter' && load()} placeholder="Search by name, company, or skill" /></div><input value={filters.branch} onChange={(e) => setFilters({ ...filters, branch: e.target.value })} placeholder="Branch" /><input value={filters.graduation_year} onChange={(e) => setFilters({ ...filters, graduation_year: e.target.value })} placeholder="Graduation year" /><input value={filters.location} onChange={(e) => setFilters({ ...filters, location: e.target.value })} placeholder="Location" /><Button variant="secondary" onClick={load}><SlidersHorizontal size={15} /> Apply filters</Button></div>{state.error && <Notice>{state.error}</Notice>}{state.loading ? <Loader label="Loading alumni" /> : data.results?.length ? <div className="directory-grid">{data.results.filter((person) => person.id !== user.id).map((person) => <article className="person-card" key={person.id}><div className="person-card-top"><span className="avatar-circle large">{initials(person.full_name)}</span><span className="person-status"><span /> Active</span></div><h3>{person.full_name}</h3><p className="person-role">{person.designation || 'Alumni member'}{person.company ? ` · ${person.company}` : ''}</p><div className="person-meta"><span><GraduationCap size={13} /> {person.branch || 'Community'} · {person.graduation_year || '—'}</span><span><MapPin size={13} /> {person.location || 'Location private'}</span></div><div className="tag-row">{(person.skills || []).slice(0, 3).map((skill) => <span key={skill}>{skill}</span>)}</div><Button variant="outline" className="full-width" onClick={() => onStartChat(person)}><MessageCircle size={15} /> Start a conversation</Button></article>)}</div> : <EmptyState icon={Users} title="No members found" text="Try a wider search or check another graduating year." />}{editing && <Modal title="Update your profile" onClose={() => setEditing(false)}><form className="modal-form" onSubmit={saveProfile}><Field label="Company" value={profile.company} onChange={(e) => setProfile({ ...profile, company: e.target.value })} /><Field label="Designation" value={profile.designation} onChange={(e) => setProfile({ ...profile, designation: e.target.value })} /><div className="two-fields"><Field label="Location" value={profile.location} onChange={(e) => setProfile({ ...profile, location: e.target.value })} /><Field label="Branch" value={profile.branch} onChange={(e) => setProfile({ ...profile, branch: e.target.value })} /></div><Field label="LinkedIn URL" value={profile.linkedin_url} onChange={(e) => setProfile({ ...profile, linkedin_url: e.target.value })} /><Field label="Skills" value={profile.skills} onChange={(e) => setProfile({ ...profile, skills: e.target.value })} hint="Separate skills with commas." /><div className="modal-actions"><Button variant="secondary" type="button" onClick={() => setEditing(false)}>Cancel</Button><Button type="submit">Save profile</Button></div></form></Modal>}</div>;
+  return <div className="page-content"><PageHeader eyebrow="People like you" title="Alumni directory" text="Search the full community by experience, cohort, and shared interests." /><div className="filter-bar"><div className="search-input"><Search size={16} /><input value={filters.query} onChange={(e) => setFilters({ ...filters, query: e.target.value })} onKeyDown={(e) => e.key === 'Enter' && load()} placeholder="Search by name, company, or skill" /></div><input value={filters.branch} onChange={(e) => setFilters({ ...filters, branch: e.target.value })} placeholder="Branch" /><input value={filters.graduation_year} onChange={(e) => setFilters({ ...filters, graduation_year: e.target.value })} placeholder="Graduation year" /><input value={filters.location} onChange={(e) => setFilters({ ...filters, location: e.target.value })} placeholder="Location" /><Button variant="secondary" onClick={load}><SlidersHorizontal size={15} /> Apply filters</Button></div>{state.error && <Notice>{state.error}</Notice>}{state.loading ? <Loader label="Loading alumni" /> : data.results?.length ? <div className="directory-grid">{data.results.filter((person) => person.id !== user.id).map((person) => <article className="person-card" key={person.id}><div className="person-card-top"><span className="avatar-circle large">{initials(person.full_name)}</span><span className="person-status"><span /> Active</span></div><h3>{person.full_name}</h3><p className="person-role">{person.designation || 'Alumni member'}{person.company ? ` · ${person.company}` : ''}</p><div className="person-meta"><span><GraduationCap size={13} /> {person.branch || 'Community'} · {person.graduation_year || '—'}</span><span><MapPin size={13} /> {person.location || 'Location private'}</span></div><div className="tag-row">{(person.skills || []).slice(0, 3).map((skill) => <span key={skill}>{skill}</span>)}</div><Button variant="outline" className="full-width" onClick={() => onStartChat(person)}><MessageCircle size={15} /> Start a conversation</Button></article>)}</div> : <EmptyState icon={Users} title="No members found" text="Try a wider search or check another graduating year." />}</div>;
 }
 
 function Jobs({ user, request, onStartChat }) {
@@ -714,7 +713,182 @@ function Chat({ user, request, initialActiveId, clearInitialActiveId }) {
 }
 
 function Admin({ request }) { const [facultyId, setFacultyId] = useState(''); const [alumniId, setAlumniId] = useState(''); const [message, setMessage] = useState(''); const [error, setError] = useState(''); const approve = async (type) => { try { const id = type === 'faculty' ? facultyId : alumniId; await request(type === 'faculty' ? `/api/v1/auth/faculty/${id}/approve` : `/api/v1/alumni/${id}/approve`, { method: 'PATCH' }); setMessage(`${type[0].toUpperCase() + type.slice(1)} profile approved.`); } catch (err) { setError(err.message); } }; return <div className="page-content"><PageHeader eyebrow="Keep the network trusted" title="Admin review" text="Approve verified profiles as they are ready to join the active community." />{message && <Notice type="success">{message}</Notice>}{error && <Notice>{error}</Notice>}<div className="review-grid"><div className="panel review-card"><span className="review-icon"><GraduationCap size={19} /></span><h3>Faculty approval</h3><p>Enter the faculty profile ID from the review queue to activate the account.</p><Field label="Faculty ID" value={facultyId} onChange={(e) => setFacultyId(e.target.value)} placeholder="UUID" /><Button onClick={() => approve('faculty')}>Approve faculty <Check size={15} /></Button></div><div className="panel review-card"><span className="review-icon"><Users size={19} /></span><h3>Alumni approval</h3><p>Approve an alumni profile that has completed its moderation review.</p><Field label="Alumni ID" value={alumniId} onChange={(e) => setAlumniId(e.target.value)} placeholder="UUID" /><Button onClick={() => approve('alumni')}>Approve alumni <Check size={15} /></Button></div></div></div>; }
-function Profile({ user, onLogout }) { return <div className="page-content"><PageHeader eyebrow="Your identity in the network" title="Profile" text="The details that help your community recognize and support you." action={<Button variant="secondary" onClick={onLogout}><LogOut size={15} /> Sign out</Button>} /><div className="profile-layout"><div className="panel profile-card-large"><span className="avatar-circle giant">{initials(user?.full_name)}</span><div className="eyebrow">{user?.role}</div><h2>{user?.full_name}</h2><p>{user?.email}</p><span className="verified-chip"><Check size={12} /> Active member</span></div><div className="panel profile-details"><div className="panel-heading"><h3>Account details</h3><ShieldCheck size={17} /></div><div className="detail-list"><div><span>Full name</span><strong>{user?.full_name || '—'}</strong></div><div><span>Email</span><strong>{user?.email || '—'}</strong></div><div><span>Role</span><strong>{user?.role || '—'}</strong></div><div><span>Profile status</span><strong>Verified and active</strong></div></div></div></div></div>; }
+function Profile({ user, onLogout, request, onUserUpdate }) {
+  const [editing, setEditing] = useState(false);
+  const [profile, setProfile] = useState({
+    company: user?.alumni_profile?.company || '',
+    designation: user?.alumni_profile?.designation || '',
+    location: user?.alumni_profile?.location || '',
+    linkedin_url: user?.alumni_profile?.linkedin_url || '',
+    skills: (user?.alumni_profile?.skills || []).join(', '),
+    branch: user?.alumni_profile?.branch || ''
+  });
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    if (user?.alumni_profile) {
+      setProfile({
+        company: user.alumni_profile.company || '',
+        designation: user.alumni_profile.designation || '',
+        location: user.alumni_profile.location || '',
+        linkedin_url: user.alumni_profile.linkedin_url || '',
+        skills: (user.alumni_profile.skills || []).join(', '),
+        branch: user.alumni_profile.branch || ''
+      });
+    }
+  }, [user]);
+
+  const saveProfile = async (event) => {
+    event.preventDefault();
+    try {
+      const updated = await request('/api/v1/alumni/profile', {
+        method: 'PUT',
+        body: JSON.stringify({
+          ...profile,
+          skills: profile.skills.split(',').map((item) => item.trim()).filter(Boolean)
+        })
+      });
+      onUserUpdate(updated);
+      setEditing(false);
+      setError('');
+    } catch (err) {
+      setError(err.message);
+    }
+  };
+
+  return (
+    <div className="page-content">
+      <PageHeader 
+        eyebrow="Your identity in the network" 
+        title="Profile" 
+        text="The details that help your community recognize and support you." 
+        action={
+          <div style={{ display: 'flex', gap: '0.5rem' }}>
+            {user?.role === 'alumni' && (
+              <Button onClick={() => setEditing(true)}>
+                <Pencil size={15} /> Edit profile
+              </Button>
+            )}
+            <Button variant="secondary" onClick={onLogout}>
+              <LogOut size={15} /> Sign out
+            </Button>
+          </div>
+        } 
+      />
+      {error && <Notice>{error}</Notice>}
+      <div className="profile-layout" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+        <div style={{ display: 'flex', gap: '1.5rem', flexWrap: 'wrap' }}>
+          <div className="panel profile-card-large" style={{ flex: '1 1 300px' }}>
+            <span className="avatar-circle giant">{initials(user?.full_name)}</span>
+            <div className="eyebrow" style={{ textTransform: 'capitalize' }}>{user?.role}</div>
+            <h2>{user?.full_name}</h2>
+            <p>{user?.email}</p>
+            <span className="verified-chip"><Check size={12} /> Active member</span>
+          </div>
+          <div className="panel profile-details" style={{ flex: '2 1 500px' }}>
+            <div className="panel-heading">
+              <h3>Account details</h3>
+              <ShieldCheck size={17} />
+            </div>
+            <div className="detail-list">
+              <div><span>Full name</span><strong>{user?.full_name || '—'}</strong></div>
+              <div><span>Email</span><strong>{user?.email || '—'}</strong></div>
+              <div><span>Role</span><strong style={{ textTransform: 'capitalize' }}>{user?.role || '—'}</strong></div>
+              <div><span>Profile status</span><strong>Verified and active</strong></div>
+            </div>
+          </div>
+        </div>
+
+        {user?.role === 'alumni' && (
+          <div className="panel profile-details">
+            <div className="panel-heading">
+              <h3>Professional Details</h3>
+              <Briefcase size={17} />
+            </div>
+            <div className="detail-list">
+              <div><span>Company</span><strong>{user.alumni_profile?.company || '—'}</strong></div>
+              <div><span>Designation</span><strong>{user.alumni_profile?.designation || '—'}</strong></div>
+              <div><span>Branch/Specialization</span><strong>{user.alumni_profile?.branch || '—'}</strong></div>
+              <div><span>Graduation Year</span><strong>{user.alumni_profile?.graduation_year || '—'}</strong></div>
+              <div><span>Location</span><strong>{user.alumni_profile?.location || '—'}</strong></div>
+              <div>
+                <span>LinkedIn</span>
+                <strong>
+                  {user.alumni_profile?.linkedin_url ? (
+                    <a href={user.alumni_profile.linkedin_url} target="_blank" rel="noreferrer">
+                      {user.alumni_profile.linkedin_url}
+                    </a>
+                  ) : '—'}
+                </strong>
+              </div>
+              <div>
+                <span>Skills</span>
+                <strong>
+                  {user.alumni_profile?.skills?.length ? (
+                    <div className="tag-row" style={{ display: 'inline-flex', flexWrap: 'wrap', gap: '0.25rem' }}>
+                      {user.alumni_profile.skills.map((skill) => (
+                        <span key={skill} style={{ background: '#f1f5f9', padding: '0.25rem 0.5rem', borderRadius: '4px', fontSize: '0.8rem', color: '#475569' }}>
+                          {skill}
+                        </span>
+                      ))}
+                    </div>
+                  ) : '—'}
+                </strong>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {user?.role === 'student' && (
+          <div className="panel profile-details">
+            <div className="panel-heading">
+              <h3>Academic Details</h3>
+              <GraduationCap size={17} />
+            </div>
+            <div className="detail-list">
+              <div><span>USN</span><strong>{user.student_profile?.usn || '—'}</strong></div>
+              <div><span>Branch/Specialization</span><strong>{user.student_profile?.branch || '—'}</strong></div>
+              <div><span>Graduation Year</span><strong>{user.student_profile?.graduation_year || '—'}</strong></div>
+            </div>
+          </div>
+        )}
+
+        {user?.role === 'faculty' && (
+          <div className="panel profile-details">
+            <div className="panel-heading">
+              <h3>Academic Details</h3>
+              <GraduationCap size={17} />
+            </div>
+            <div className="detail-list">
+              <div><span>Employee ID</span><strong>{user.faculty_profile?.employee_id || '—'}</strong></div>
+              <div><span>Department</span><strong>{user.faculty_profile?.department || '—'}</strong></div>
+              <div><span>Designation</span><strong>{user.faculty_profile?.designation || '—'}</strong></div>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {editing && (
+        <Modal title="Update your profile" onClose={() => setEditing(false)}>
+          <form className="modal-form" onSubmit={saveProfile}>
+            <Field label="Company" value={profile.company} onChange={(e) => setProfile({ ...profile, company: e.target.value })} />
+            <Field label="Designation" value={profile.designation} onChange={(e) => setProfile({ ...profile, designation: e.target.value })} />
+            <div className="two-fields">
+              <Field label="Location" value={profile.location} onChange={(e) => setProfile({ ...profile, location: e.target.value })} />
+              <Field label="Branch" value={profile.branch} onChange={(e) => setProfile({ ...profile, branch: e.target.value })} />
+            </div>
+            <Field label="LinkedIn URL" value={profile.linkedin_url} onChange={(e) => setProfile({ ...profile, linkedin_url: e.target.value })} />
+            <Field label="Skills" value={profile.skills} onChange={(e) => setProfile({ ...profile, skills: e.target.value })} hint="Separate skills with commas." />
+            <div className="modal-actions">
+              <Button variant="secondary" type="button" onClick={() => setEditing(false)}>Cancel</Button>
+              <Button type="submit">Save profile</Button>
+            </div>
+          </form>
+        </Modal>
+      )}
+    </div>
+  );
+}
 function Modal({ title, children, onClose }) { return <div className="modal-overlay"><div className="modal-card"><div className="modal-header"><h3>{title}</h3><IconButton label="Close" onClick={onClose}><X size={18} /></IconButton></div>{children}</div><button className="modal-backdrop" onClick={onClose} aria-label="Close modal" /></div>; }
 
 export default function App() {
@@ -814,7 +988,7 @@ export default function App() {
     events: <Events user={user} request={request} onStartChat={(authorId) => { request('/api/v1/chat/conversations', { method: 'POST', body: JSON.stringify({ recipient_id: authorId }) }).then((conversation) => { setChatActiveId(conversation.id); }).finally(() => setPage('chat')); }} />,
     chat: <Chat user={user} request={request} initialActiveId={chatActiveId} clearInitialActiveId={() => setChatActiveId(null)} />,
     admin: <Admin request={request} />,
-    profile: <Profile user={user} onLogout={logout} />
+    profile: <Profile user={user} onLogout={logout} request={request} onUserUpdate={(updated) => { setUser((prev) => ({ ...prev, alumni_profile: updated.alumni })); }} />
   }[currentPage];
 
   return (

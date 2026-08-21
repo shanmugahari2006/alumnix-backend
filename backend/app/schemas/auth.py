@@ -58,7 +58,7 @@ class PasswordResetRequest(BaseModel):
         return v
 
 import uuid
-from typing import Optional
+from typing import Optional, List
 
 class StudentProfileResponse(BaseModel):
     usn: str
@@ -71,6 +71,10 @@ class AlumniProfileResponse(BaseModel):
     company: Optional[str] = None
     designation: Optional[str] = None
     graduation_year: int
+    branch: Optional[str] = None
+    location: Optional[str] = None
+    linkedin_url: Optional[str] = None
+    skills: Optional[List[str]] = None
     is_approved: bool
     model_config = {"from_attributes": True}
 
