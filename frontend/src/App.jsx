@@ -178,7 +178,162 @@ function Jobs({ user, request }) {
 
 function Stories({ user, request }) { const [stories, setStories] = useState([]); const [loading, setLoading] = useState(true); const [error, setError] = useState(''); const [showCreate, setShowCreate] = useState(false); const [form, setForm] = useState({ title: '', content: '' }); const load = useCallback(async () => { try { setLoading(true); setStories(await request('/api/v1/stories')); } catch (err) { setError(err.message); } finally { setLoading(false); } }, [request]); useEffect(() => { load(); }, []); const create = async (event) => { event.preventDefault(); try { await request('/api/v1/stories', { method: 'POST', body: JSON.stringify(form) }); setForm({ title: '', content: '' }); setShowCreate(false); load(); } catch (err) { setError(err.message); } }; const like = async (id) => { try { const result = await request(`/api/v1/stories/${id}/like`, { method: 'POST' }); setStories((items) => items.map((story) => story.id === id ? { ...story, likes_count: result.likes_count } : story)); } catch (err) { setError(err.message); } }; return <div className="page-content"><PageHeader eyebrow="Learn from the journey" title="Success stories" text="Real paths, honest lessons, and the moments that made a difference." action={(user.role === 'alumni' || user.role === 'admin') && <Button onClick={() => setShowCreate(true)}><Plus size={16} /> Share your story</Button>} />{error && <Notice>{error}</Notice>}{loading ? <Loader label="Loading stories" /> : stories.length ? <div className="story-grid">{stories.map((story, index) => <article className={`story-card story-tone-${index % 3}`} key={story.id}><div className="story-card-top"><span className="story-number">0{index + 1}</span><span>{formatDate(story.created_at)}</span></div><h3>{story.title}</h3><p>{story.content}</p><div className="story-author"><span className="avatar-circle">{initials(story.author_name)}</span><span><strong>{story.author_name}</strong><small>Alumni community</small></span><button className="like-button" onClick={() => like(story.id)}><Heart size={15} /> {story.likes_count}</button></div></article>)}</div> : <EmptyState icon={BookOpen} title="The first story is yours" text="Share something that helped you take your next step." />}{showCreate && <Modal title="Share a success story" onClose={() => setShowCreate(false)}><form className="modal-form" onSubmit={create}><Field label="Title" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} placeholder="The introduction that changed everything" required /><TextArea label="Your story" value={form.content} onChange={(e) => setForm({ ...form, content: e.target.value })} placeholder="Tell the community what you learned…" required /><div className="modal-actions"><Button variant="secondary" type="button" onClick={() => setShowCreate(false)}>Cancel</Button><Button type="submit">Publish story</Button></div></form></Modal>}</div>; }
 
-function Events({ user, request }) { const [events, setEvents] = useState([]); const [selected, setSelected] = useState(null); const [loading, setLoading] = useState(true); const [error, setError] = useState(''); const [showCreate, setShowCreate] = useState(false); const [form, setForm] = useState({ title: '', description: '', category: 'Community', event_date: '', registration_deadline: '', registration_url: '' }); const load = useCallback(async () => { try { setLoading(true); setEvents(await request('/api/v1/bulletin-events')); } catch (err) { setError(err.message); } finally { setLoading(false); } }, [request]); useEffect(() => { load(); }, []); const create = async (event) => { event.preventDefault(); try { await request('/api/v1/bulletin-events', { method: 'POST', body: JSON.stringify({ ...form, registration_deadline: form.registration_deadline || null }) }); setShowCreate(false); load(); } catch (err) { setError(err.message); } }; const register = async () => { try { await request(`/api/v1/bulletin-events/${selected.id}/register`, { method: 'POST' }); load(); } catch (err) { setError(err.message); } }; return <div className="page-content"><PageHeader eyebrow="Stay in the loop" title="Events bulletin" text="The talks, programs, and gatherings that keep the community close." action={(user.role === 'faculty' || user.role === 'admin') && <Button onClick={() => setShowCreate(true)}><Plus size={16} /> Create event</Button>} />{error && <Notice>{error}</Notice>}{loading ? <Loader label="Loading events" /> : events.length ? <div className="events-layout"><div className="event-list">{events.map((event) => <button key={event.id} className={`event-list-item ${selected?.id === event.id ? 'selected' : ''}`} onClick={() => setSelected(event)}><span className="date-tile"><strong>{new Date(event.event_date).getDate()}</strong><small>{new Date(event.event_date).toLocaleDateString(undefined, { month: 'short' })}</small></span><span><strong>{event.title}</strong><small>{event.category} · {event.registration_count || 0} registered</small></span><ArrowRight size={15} /></button>)}</div><div className="event-detail">{selected ? <><div className="event-detail-top"><span className="eyebrow">{selected.category}</span><h2>{selected.title}</h2><div className="event-meta"><span><CalendarDays size={14} /> {formatDate(selected.event_date, true)}</span><span><Users size={14} /> {selected.registration_count || 0} registered</span></div></div><p>{selected.description}</p><div className="event-cta"><Button onClick={register}>Register for this event <ArrowRight size={15} /></Button>{selected.registration_url && <a href={selected.registration_url} target="_blank" rel="noreferrer">View registration page <ExternalLink size={14} /></a>}</div></> : <EmptyState icon={CalendarDays} title="Choose an event" text="Select a bulletin item to see details." />}</div></div> : <EmptyState icon={CalendarDays} title="No events published" text="There is nothing on the bulletin just yet." />}{showCreate && <Modal title="Create an event" onClose={() => setShowCreate(false)}><form className="modal-form" onSubmit={create}><Field label="Event title" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} required /><div className="two-fields"><Field label="Category" value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} required /><Field label="Event date" type="datetime-local" value={form.event_date} onChange={(e) => setForm({ ...form, event_date: e.target.value })} required /></div><TextArea label="Description" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} required /><Field label="Registration URL" value={form.registration_url} onChange={(e) => setForm({ ...form, registration_url: e.target.value })} required /><div className="modal-actions"><Button variant="secondary" type="button" onClick={() => setShowCreate(false)}>Cancel</Button><Button type="submit">Publish event</Button></div></form></Modal>}</div>; }
+function Events({ user, request }) {
+  const [events, setEvents] = useState([]);
+  const [selected, setSelected] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [showCreate, setShowCreate] = useState(false);
+  const [form, setForm] = useState({ title: '', description: '', location: '', date: '' });
+
+  const load = useCallback(async () => {
+    try {
+      setLoading(true);
+      setEvents(await request('/api/v1/bulletin-events'));
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  }, [request]);
+
+  useEffect(() => { load(); }, []);
+
+  const create = async (event) => {
+    event.preventDefault();
+    try {
+      await request('/api/v1/bulletin-events', {
+        method: 'POST',
+        body: JSON.stringify({
+          title: form.title,
+          description: form.description,
+          location: form.location,
+          date: form.date,
+        })
+      });
+      setShowCreate(false);
+      setForm({ title: '', description: '', location: '', date: '' });
+      load();
+    } catch (err) {
+      setError(err.message);
+    }
+  };
+
+  const register = async () => {
+    try {
+      await request(`/api/v1/bulletin-events/${selected.id}/register`, { method: 'POST' });
+      load();
+    } catch (err) {
+      setError(err.message);
+    }
+  };
+
+  return (
+    <div className="page-content">
+      <PageHeader
+        eyebrow="Stay in the loop"
+        title="Events bulletin"
+        text="The talks, programs, and gatherings that keep the community close."
+        action={(user.role === 'faculty' || user.role === 'admin') && (
+          <Button onClick={() => setShowCreate(true)}>
+            <Plus size={16} /> Create event
+          </Button>
+        )}
+      />
+      {error && <Notice>{error}</Notice>}
+      {loading ? (
+        <Loader label="Loading events" />
+      ) : events.length ? (
+        <div className="events-layout">
+          <div className="event-list">
+            {events.map((event) => (
+              <button
+                key={event.id}
+                className={`event-list-item ${selected?.id === event.id ? 'selected' : ''}`}
+                onClick={() => setSelected(event)}
+              >
+                <span className="date-tile">
+                  <strong>{new Date(event.date).getDate()}</strong>
+                  <small>
+                    {new Date(event.date).toLocaleDateString(undefined, { month: 'short' })}
+                  </small>
+                </span>
+                <span>
+                  <strong>{event.title}</strong>
+                  <small>{event.location}</small>
+                </span>
+                <ArrowRight size={15} />
+              </button>
+            ))}
+          </div>
+          <div className="event-detail">
+            {selected ? (
+              <>
+                <div className="event-detail-top">
+                  <span className="eyebrow">{selected.location}</span>
+                  <h2>{selected.title}</h2>
+                  <div className="event-meta">
+                    <span>
+                      <CalendarDays size={14} /> {formatDate(selected.date, true)}
+                    </span>
+                  </div>
+                </div>
+                <p>{selected.description}</p>
+                <div className="event-cta">
+                  <Button onClick={register}>Register for this event <ArrowRight size={15} /></Button>
+                </div>
+              </>
+            ) : (
+              <EmptyState icon={CalendarDays} title="Choose an event" text="Select a bulletin item to see details." />
+            )}
+          </div>
+        </div>
+      ) : (
+        <EmptyState icon={CalendarDays} title="No events published" text="There is nothing on the bulletin just yet." />
+      )}
+      {showCreate && (
+        <Modal title="Create an event" onClose={() => setShowCreate(false)}>
+          <form className="modal-form" onSubmit={create}>
+            <Field
+              label="Event title"
+              value={form.title}
+              onChange={(e) => setForm({ ...form, title: e.target.value })}
+              required
+            />
+            <div className="two-fields">
+              <Field
+                label="Location"
+                value={form.location}
+                onChange={(e) => setForm({ ...form, location: e.target.value })}
+                placeholder="e.g. Auditorium, Zoom Link"
+                required
+              />
+              <Field
+                label="Event date"
+                type="datetime-local"
+                value={form.date}
+                onChange={(e) => setForm({ ...form, date: e.target.value })}
+                required
+              />
+            </div>
+            <TextArea
+              label="Description"
+              value={form.description}
+              onChange={(e) => setForm({ ...form, description: e.target.value })}
+              required
+            />
+            <div className="modal-actions">
+              <Button variant="secondary" type="button" onClick={() => setShowCreate(false)}>
+                Cancel
+              </Button>
+              <Button type="submit">Publish event</Button>
+            </div>
+          </form>
+        </Modal>
+      )}
+    </div>
+  );
+}
 
 const loadRazorpayScript = () => {
   return new Promise((resolve) => {
