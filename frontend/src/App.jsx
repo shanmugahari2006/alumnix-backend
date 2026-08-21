@@ -245,56 +245,76 @@ function Fundraisers({ user, request }) {
         })
       });
 
-      // 2. Load Razorpay script
-      const scriptLoaded = await loadRazorpayScript();
-      if (!scriptLoaded) {
-        throw new Error('Razorpay SDK failed to load. Please check your internet connection.');
-      }
+      // Check if we are running in Demo Mode (using placeholder keys)
+      const isDemoMode = !order.key_id || order.key_id === 'your_razorpay_key_id' || !order.key_id.startsWith('rzp_');
 
-      // 3. Configure and open Razorpay
-      const options = {
-        key: order.key_id,
-        amount: order.amount * 100, // in paise
-        currency: order.currency,
-        name: 'Alumnix',
-        description: `Support ${selected.title}`,
-        order_id: order.order_id,
-        handler: async function (response) {
-          try {
-            // 4. Verify payment signature
-            await request('/api/v1/donations/verify', {
-              method: 'POST',
-              body: JSON.stringify({
-                razorpay_order_id: response.razorpay_order_id,
-                razorpay_payment_id: response.razorpay_payment_id,
-                razorpay_signature: response.razorpay_signature
-              })
-            });
+      const handleSuccess = async (response) => {
+        try {
+          // Verify payment signature
+          await request('/api/v1/donations/verify', {
+            method: 'POST',
+            body: JSON.stringify({
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_signature: response.razorpay_signature
+            })
+          });
 
-            // 5. Update campaign raised amount
-            await request(`/api/v1/fundraisers/${selected.id}/donate`, {
-              method: 'POST',
-              body: JSON.stringify({ amount })
-            });
+          // Update campaign raised amount
+          await request(`/api/v1/fundraisers/${selected.id}/donate`, {
+            method: 'POST',
+            body: JSON.stringify({ amount })
+            
+          });
 
-            setSelected(null);
-            setDonationAmount('');
-            load();
-          } catch (err) {
-            setError(err.message);
-          }
-        },
-        prefill: {
-          name: user.full_name,
-          email: user.email
-        },
-        theme: {
-          color: '#0f172a'
+          setSelected(null);
+          setDonationAmount('');
+          load();
+        } catch (err) {
+          setError(err.message);
         }
       };
 
-      const rzp = new window.Razorpay(options);
-      rzp.open();
+      if (isDemoMode) {
+        // In Demo Mode, simulate a payment prompt
+        const confirmPayment = window.confirm(
+          `[Demo Mode] Simulated payment gateway.\n\nContribute ₹${amount} to "${selected.title}"?`
+        );
+        if (confirmPayment) {
+          await handleSuccess({
+            razorpay_order_id: order.order_id,
+            razorpay_payment_id: `pay_mock_${Math.random().toString(36).slice(2, 11)}`,
+            razorpay_signature: 'sig_mock_verified'
+          });
+        }
+      } else {
+        // 2. Load Razorpay script
+        const scriptLoaded = await loadRazorpayScript();
+        if (!scriptLoaded) {
+          throw new Error('Razorpay SDK failed to load. Please check your internet connection.');
+        }
+
+        // 3. Configure and open Razorpay
+        const options = {
+          key: order.key_id,
+          amount: order.amount * 100, // in paise
+          currency: order.currency,
+          name: 'Alumnix',
+          description: `Support ${selected.title}`,
+          order_id: order.order_id,
+          handler: handleSuccess,
+          prefill: {
+            name: user.full_name,
+            email: user.email
+          },
+          theme: {
+            color: '#0f172a'
+          }
+        };
+
+        const rzp = new window.Razorpay(options);
+        rzp.open();
+      }
     } catch (err) {
       setError(err.message);
     }
