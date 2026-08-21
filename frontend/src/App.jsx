@@ -30,7 +30,7 @@ const features = [
   { icon: Users, title: 'Alumni directory', text: 'Find mentors, collaborators, and familiar faces across every graduating class.' },
   { icon: Briefcase, title: 'Career board', text: 'Discover trusted opportunities and build a stronger path forward.' },
   { icon: Star, title: 'Success stories', text: 'Learn from the people who turned campus beginnings into meaningful careers.' },
-  { icon: CircleDollarSign, title: 'Startup fundraisers', text: 'Back promising student ventures and keep the alumni network moving.' },
+  { icon: IndianRupee, title: 'Startup fundraisers', text: 'Back promising student ventures and keep the alumni network moving.' },
   { icon: CalendarDays, title: 'Events bulletin', text: 'Keep the community close with talks, reunions, programs, and meetups.' },
   { icon: MessageCircle, title: 'Private messaging', text: 'Move from a directory introduction to a real conversation in seconds.' },
 ];
