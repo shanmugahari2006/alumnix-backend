@@ -757,6 +757,38 @@ a {
   font-weight: 700;
 }
 
+.field-input-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.field-input-wrap input {
+  padding-right: 40px;
+}
+
+.toggle-password {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--muted);
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  transition: color .18s, background .18s;
+}
+
+.toggle-password:hover {
+  color: var(--ink);
+  background: rgba(0,0,0,.05);
+}
+
 .field input, .field textarea, .field select, .filter-bar input, .search-input input, .message-composer input {
   width: 100%;
   min-height: 43px;

@@ -357,8 +357,7 @@ async def forgot_password(payload: ForgotPasswordRequest, db: AsyncSession = Dep
         res = await db.execute(select(User).where(User.email == email))
         user = res.scalars().first()
         if not user:
-            # Return success even if user not found to prevent user enumeration
-            return {"status": "success", "message": "Recovery code sent if account exists"}
+            raise HTTPException(status_code=404, detail="No account found with this email address. Please check and try again.")
             
         code = OTPService.generate_reset_code()
         OTPService.store_email_code(email, code)
@@ -367,14 +366,17 @@ async def forgot_password(payload: ForgotPasswordRequest, db: AsyncSession = Dep
         
     elif payload.phone_number:
         phone = payload.phone_number.strip()
-        res = await db.execute(select(User).where(User.phone_number == phone))
+        # Normalize: extract last 10 digits for matching
+        digits = ''.join(c for c in phone if c.isdigit())
+        last10 = digits[-10:] if len(digits) >= 10 else digits
+        res = await db.execute(select(User).where(User.phone_number.endswith(last10)))
         user = res.scalars().first()
         if not user:
-            return {"status": "success", "message": "Recovery code sent if account exists"}
+            raise HTTPException(status_code=404, detail="No account found with this phone number. Please check and try again.")
             
         otp = OTPService.generate_otp()
-        OTPService.store_otp(phone, otp)
-        await OTPService.send_sms(phone, f"Your AlumniConnect password reset OTP is: {otp}. Valid for 5 minutes.")
+        OTPService.store_otp(user.phone_number, otp)
+        await OTPService.send_sms(user.phone_number, f"Your AlumniConnect password reset OTP is: {otp}. Valid for 5 minutes.")
         return {"status": "success", "message": "Recovery OTP sent successfully"}
 
 @router.post("/reset-password", status_code=status.HTTP_200_OK)
@@ -399,14 +401,17 @@ async def reset_password(payload: ResetPasswordRequest, db: AsyncSession = Depen
         
     elif payload.phone_number:
         phone = payload.phone_number.strip()
-        valid = OTPService.verify_otp(phone, payload.code)
-        if not valid:
-            raise HTTPException(status_code=400, detail="Invalid or expired OTP code")
-            
-        res = await db.execute(select(User).where(User.phone_number == phone))
+        # Normalize: extract last 10 digits for matching
+        digits = ''.join(c for c in phone if c.isdigit())
+        last10 = digits[-10:] if len(digits) >= 10 else digits
+        res = await db.execute(select(User).where(User.phone_number.endswith(last10)))
         user = res.scalars().first()
         if not user:
             raise HTTPException(status_code=404, detail="User not found")
+        
+        valid = OTPService.verify_otp(user.phone_number, payload.code)
+        if not valid:
+            raise HTTPException(status_code=400, detail="Invalid or expired OTP code")
             
         user.hashed_password = hash_password(payload.new_password)
         await db.commit()
