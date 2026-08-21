@@ -40,6 +40,16 @@ class StatusPill extends StatelessWidget {
     );
   }
 
+  /// Factory for "Registered" event badge
+  factory StatusPill.registered({String label = 'Registered', Key? key}) {
+    return StatusPill(
+      key: key,
+      label: label,
+      type: StatusPillType.info,
+      icon: Icons.event_available_rounded,
+    );
+  }
+
   /// Factory for "Pending Approval" badge
   factory StatusPill.pending({String label = 'Pending Approval', Key? key}) {
     return StatusPill(

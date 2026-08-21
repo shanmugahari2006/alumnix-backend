@@ -18,6 +18,7 @@ class ApiConfig {
   static const String me = '/auth/me';
 
   // Registration Wizard Endpoints
+  static const String register = '/auth/register';
   static const String registerVerifyUsn = '/auth/register/verify-usn';
   static const String registerSendOtp = '/auth/register/send-otp';
   static const String registerVerifyOtp = '/auth/register/verify-otp';
