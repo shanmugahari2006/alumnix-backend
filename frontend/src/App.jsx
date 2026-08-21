@@ -250,8 +250,10 @@ function Fundraisers({ user, request }) {
 
       const handleSuccess = async (response) => {
         try {
+          console.log("Verification started with payload:", response);
+          
           // Verify payment signature
-          await request('/api/v1/donations/verify', {
+          const verifyResult = await request('/api/v1/donations/verify', {
             method: 'POST',
             body: JSON.stringify({
               razorpay_order_id: response.razorpay_order_id,
@@ -259,19 +261,25 @@ function Fundraisers({ user, request }) {
               razorpay_signature: response.razorpay_signature
             })
           });
+          
+          console.log("Verification success:", verifyResult);
 
           // Update campaign raised amount
-          await request(`/api/v1/fundraisers/${selected.id}/donate`, {
+          console.log("Updating fundraiser campaign id:", selected.id, "with amount:", amount);
+          const updateResult = await request(`/api/v1/fundraisers/${selected.id}/donate`, {
             method: 'POST',
             body: JSON.stringify({ amount })
-            
           });
+          
+          console.log("Fundraiser update success:", updateResult);
 
           setSelected(null);
           setDonationAmount('');
           load();
         } catch (err) {
-          setError(err.message);
+          console.error("Error in handleSuccess flow:", err);
+          setError(err.message || String(err));
+          alert("Payment/Update Error: " + (err.message || String(err)));
         }
       };
 
