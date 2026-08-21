@@ -31,17 +31,24 @@ class PaymentService:
             "receipt": receipt_id
         }
         
-        try:
-            # Run the synchronous SDK request in a background thread to prevent blocking the event loop
-            razorpay_order = await asyncio.to_thread(
-                razorpay_client.order.create, 
-                data=order_data
-            )
-        except Exception as e:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"Failed to create Razorpay order: {str(e)}"
-            )
+        if settings.RAZORPAY_KEY_ID == "your_razorpay_key_id" or not settings.RAZORPAY_KEY_ID:
+            razorpay_order = {
+                "id": f"order_mock_{uuid.uuid4().hex[:10]}",
+                "amount": amount_in_paise,
+                "currency": "INR"
+            }
+        else:
+            try:
+                # Run the synchronous SDK request in a background thread to prevent blocking the event loop
+                razorpay_order = await asyncio.to_thread(
+                    razorpay_client.order.create, 
+                    data=order_data
+                )
+            except Exception as e:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=f"Failed to create Razorpay order: {str(e)}"
+                )
             
         donation = Donation(
             donor_id=donor_id,
@@ -83,19 +90,23 @@ class PaymentService:
             "razorpay_signature": razorpay_signature
         }
         
-        try:
-            # Run signature verification in a background thread
-            await asyncio.to_thread(
-                razorpay_client.utility.verify_payment_signature,
-                params
-            )
-        except Exception as e:
-            donation.status = "failed"
-            await db.commit()
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Payment verification failed: Invalid signature"
-            )
+        if settings.RAZORPAY_KEY_ID == "your_razorpay_key_id" or not settings.RAZORPAY_KEY_ID:
+            # Simulate signature verification success
+            pass
+        else:
+            try:
+                # Run signature verification in a background thread
+                await asyncio.to_thread(
+                    razorpay_client.utility.verify_payment_signature,
+                    params
+                )
+            except Exception as e:
+                donation.status = "failed"
+                await db.commit()
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="Payment verification failed: Invalid signature"
+                )
             
         donation.status = "completed"
         donation.razorpay_payment_id = razorpay_payment_id

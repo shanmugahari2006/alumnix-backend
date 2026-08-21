@@ -180,6 +180,16 @@ function Stories({ user, request }) { const [stories, setStories] = useState([])
 
 function Events({ user, request }) { const [events, setEvents] = useState([]); const [selected, setSelected] = useState(null); const [loading, setLoading] = useState(true); const [error, setError] = useState(''); const [showCreate, setShowCreate] = useState(false); const [form, setForm] = useState({ title: '', description: '', category: 'Community', event_date: '', registration_deadline: '', registration_url: '' }); const load = useCallback(async () => { try { setLoading(true); setEvents(await request('/api/v1/bulletin-events')); } catch (err) { setError(err.message); } finally { setLoading(false); } }, [request]); useEffect(() => { load(); }, []); const create = async (event) => { event.preventDefault(); try { await request('/api/v1/bulletin-events', { method: 'POST', body: JSON.stringify({ ...form, registration_deadline: form.registration_deadline || null }) }); setShowCreate(false); load(); } catch (err) { setError(err.message); } }; const register = async () => { try { await request(`/api/v1/bulletin-events/${selected.id}/register`, { method: 'POST' }); load(); } catch (err) { setError(err.message); } }; return <div className="page-content"><PageHeader eyebrow="Stay in the loop" title="Events bulletin" text="The talks, programs, and gatherings that keep the community close." action={(user.role === 'faculty' || user.role === 'admin') && <Button onClick={() => setShowCreate(true)}><Plus size={16} /> Create event</Button>} />{error && <Notice>{error}</Notice>}{loading ? <Loader label="Loading events" /> : events.length ? <div className="events-layout"><div className="event-list">{events.map((event) => <button key={event.id} className={`event-list-item ${selected?.id === event.id ? 'selected' : ''}`} onClick={() => setSelected(event)}><span className="date-tile"><strong>{new Date(event.event_date).getDate()}</strong><small>{new Date(event.event_date).toLocaleDateString(undefined, { month: 'short' })}</small></span><span><strong>{event.title}</strong><small>{event.category} · {event.registration_count || 0} registered</small></span><ArrowRight size={15} /></button>)}</div><div className="event-detail">{selected ? <><div className="event-detail-top"><span className="eyebrow">{selected.category}</span><h2>{selected.title}</h2><div className="event-meta"><span><CalendarDays size={14} /> {formatDate(selected.event_date, true)}</span><span><Users size={14} /> {selected.registration_count || 0} registered</span></div></div><p>{selected.description}</p><div className="event-cta"><Button onClick={register}>Register for this event <ArrowRight size={15} /></Button>{selected.registration_url && <a href={selected.registration_url} target="_blank" rel="noreferrer">View registration page <ExternalLink size={14} /></a>}</div></> : <EmptyState icon={CalendarDays} title="Choose an event" text="Select a bulletin item to see details." />}</div></div> : <EmptyState icon={CalendarDays} title="No events published" text="There is nothing on the bulletin just yet." />}{showCreate && <Modal title="Create an event" onClose={() => setShowCreate(false)}><form className="modal-form" onSubmit={create}><Field label="Event title" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} required /><div className="two-fields"><Field label="Category" value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} required /><Field label="Event date" type="datetime-local" value={form.event_date} onChange={(e) => setForm({ ...form, event_date: e.target.value })} required /></div><TextArea label="Description" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} required /><Field label="Registration URL" value={form.registration_url} onChange={(e) => setForm({ ...form, registration_url: e.target.value })} required /><div className="modal-actions"><Button variant="secondary" type="button" onClick={() => setShowCreate(false)}>Cancel</Button><Button type="submit">Publish event</Button></div></form></Modal>}</div>; }
 
+const loadRazorpayScript = () => {
+  return new Promise((resolve) => {
+    const script = document.createElement('script');
+    script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+    script.onload = () => resolve(true);
+    script.onerror = () => resolve(false);
+    document.body.appendChild(script);
+  });
+};
+
 function Fundraisers({ user, request }) {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -226,13 +236,65 @@ function Fundraisers({ user, request }) {
     const amount = parseInt(donationAmount);
     if (!amount || amount <= 0) return;
     try {
-      await request(`/api/v1/fundraisers/${selected.id}/donate`, {
+      // 1. Create order on the backend
+      const order = await request('/api/v1/donations/create-order', {
         method: 'POST',
-        body: JSON.stringify({ amount })
+        body: JSON.stringify({
+          amount: amount,
+          purpose: `Support ${selected.title}`
+        })
       });
-      setSelected(null);
-      setDonationAmount('');
-      load();
+
+      // 2. Load Razorpay script
+      const scriptLoaded = await loadRazorpayScript();
+      if (!scriptLoaded) {
+        throw new Error('Razorpay SDK failed to load. Please check your internet connection.');
+      }
+
+      // 3. Configure and open Razorpay
+      const options = {
+        key: order.key_id,
+        amount: order.amount * 100, // in paise
+        currency: order.currency,
+        name: 'Alumnix',
+        description: `Support ${selected.title}`,
+        order_id: order.order_id,
+        handler: async function (response) {
+          try {
+            // 4. Verify payment signature
+            await request('/api/v1/donations/verify', {
+              method: 'POST',
+              body: JSON.stringify({
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_signature: response.razorpay_signature
+              })
+            });
+
+            // 5. Update campaign raised amount
+            await request(`/api/v1/fundraisers/${selected.id}/donate`, {
+              method: 'POST',
+              body: JSON.stringify({ amount })
+            });
+
+            setSelected(null);
+            setDonationAmount('');
+            load();
+          } catch (err) {
+            setError(err.message);
+          }
+        },
+        prefill: {
+          name: user.full_name,
+          email: user.email
+        },
+        theme: {
+          color: '#0f172a'
+        }
+      };
+
+      const rzp = new window.Razorpay(options);
+      rzp.open();
     } catch (err) {
       setError(err.message);
     }
