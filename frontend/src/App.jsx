@@ -180,7 +180,147 @@ function Stories({ user, request }) { const [stories, setStories] = useState([])
 
 function Events({ user, request }) { const [events, setEvents] = useState([]); const [selected, setSelected] = useState(null); const [loading, setLoading] = useState(true); const [error, setError] = useState(''); const [showCreate, setShowCreate] = useState(false); const [form, setForm] = useState({ title: '', description: '', category: 'Community', event_date: '', registration_deadline: '', registration_url: '' }); const load = useCallback(async () => { try { setLoading(true); setEvents(await request('/api/v1/bulletin-events')); } catch (err) { setError(err.message); } finally { setLoading(false); } }, [request]); useEffect(() => { load(); }, []); const create = async (event) => { event.preventDefault(); try { await request('/api/v1/bulletin-events', { method: 'POST', body: JSON.stringify({ ...form, registration_deadline: form.registration_deadline || null }) }); setShowCreate(false); load(); } catch (err) { setError(err.message); } }; const register = async () => { try { await request(`/api/v1/bulletin-events/${selected.id}/register`, { method: 'POST' }); load(); } catch (err) { setError(err.message); } }; return <div className="page-content"><PageHeader eyebrow="Stay in the loop" title="Events bulletin" text="The talks, programs, and gatherings that keep the community close." action={(user.role === 'faculty' || user.role === 'admin') && <Button onClick={() => setShowCreate(true)}><Plus size={16} /> Create event</Button>} />{error && <Notice>{error}</Notice>}{loading ? <Loader label="Loading events" /> : events.length ? <div className="events-layout"><div className="event-list">{events.map((event) => <button key={event.id} className={`event-list-item ${selected?.id === event.id ? 'selected' : ''}`} onClick={() => setSelected(event)}><span className="date-tile"><strong>{new Date(event.event_date).getDate()}</strong><small>{new Date(event.event_date).toLocaleDateString(undefined, { month: 'short' })}</small></span><span><strong>{event.title}</strong><small>{event.category} · {event.registration_count || 0} registered</small></span><ArrowRight size={15} /></button>)}</div><div className="event-detail">{selected ? <><div className="event-detail-top"><span className="eyebrow">{selected.category}</span><h2>{selected.title}</h2><div className="event-meta"><span><CalendarDays size={14} /> {formatDate(selected.event_date, true)}</span><span><Users size={14} /> {selected.registration_count || 0} registered</span></div></div><p>{selected.description}</p><div className="event-cta"><Button onClick={register}>Register for this event <ArrowRight size={15} /></Button>{selected.registration_url && <a href={selected.registration_url} target="_blank" rel="noreferrer">View registration page <ExternalLink size={14} /></a>}</div></> : <EmptyState icon={CalendarDays} title="Choose an event" text="Select a bulletin item to see details." />}</div></div> : <EmptyState icon={CalendarDays} title="No events published" text="There is nothing on the bulletin just yet." />}{showCreate && <Modal title="Create an event" onClose={() => setShowCreate(false)}><form className="modal-form" onSubmit={create}><Field label="Event title" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} required /><div className="two-fields"><Field label="Category" value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} required /><Field label="Event date" type="datetime-local" value={form.event_date} onChange={(e) => setForm({ ...form, event_date: e.target.value })} required /></div><TextArea label="Description" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} required /><Field label="Registration URL" value={form.registration_url} onChange={(e) => setForm({ ...form, registration_url: e.target.value })} required /><div className="modal-actions"><Button variant="secondary" type="button" onClick={() => setShowCreate(false)}>Cancel</Button><Button type="submit">Publish event</Button></div></form></Modal>}</div>; }
 
-function Fundraisers({ user, request }) { const [items, setItems] = useState([]); const [loading, setLoading] = useState(true); const [error, setError] = useState(''); const load = useCallback(async () => { try { setLoading(true); setItems(await request('/api/v1/fundraisers')); } catch (err) { setError(err.message); } finally { setLoading(false); } }, [request]); useEffect(() => { load(); }, []); return <div className="page-content"><PageHeader eyebrow="Back a bold idea" title="Startup fundraisers" text="Support student-led ideas and the people brave enough to build them." action={(user.role === 'student' || user.role === 'admin') && <Button><Plus size={16} /> Start a campaign</Button>} />{error && <Notice>{error}</Notice>}{loading ? <Loader label="Loading campaigns" /> : items.length ? <div className="fundraiser-grid">{items.map((item) => <article className="fundraiser-card" key={item.id}><div className="fundraiser-art"><span>{initials(item.title)}</span><CircleDollarSign size={24} /></div><div className="fundraiser-body"><span className="eyebrow">Student venture</span><h3>{item.title}</h3><p>{item.description || 'A community-led campaign looking for its first supporters.'}</p><div className="fundraiser-progress"><span style={{ width: `${Math.min(100, ((item.raised_amount || item.current_amount || 0) / (item.goal_amount || 1)) * 100)}%` }} /></div><div className="fundraiser-stats"><span><strong>₹{item.raised_amount || item.current_amount || 0}</strong> raised</span><span>Goal ₹{item.goal_amount || '—'}</span></div><Button className="full-width">View campaign <ArrowRight size={15} /></Button></div></article>)}</div> : <EmptyState icon={CircleDollarSign} title="No campaigns yet" text="When a student venture is ready to raise, it will appear here." />}</div>; }
+function Fundraisers({ user, request }) {
+  const [items, setItems] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [showCreate, setShowCreate] = useState(false);
+  const [selected, setSelected] = useState(null);
+  const [donationAmount, setDonationAmount] = useState('');
+  const [form, setForm] = useState({ title: '', description: '', goal_amount: '' });
+
+  const load = useCallback(async () => {
+    try {
+      setLoading(true);
+      setItems(await request('/api/v1/fundraisers'));
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  }, [request]);
+
+  useEffect(() => { load(); }, []);
+
+  const createCampaign = async (event) => {
+    event.preventDefault();
+    try {
+      await request('/api/v1/fundraisers', {
+        method: 'POST',
+        body: JSON.stringify({
+          title: form.title,
+          description: form.description,
+          goal_amount: parseInt(form.goal_amount) || 0
+        })
+      });
+      setShowCreate(false);
+      setForm({ title: '', description: '', goal_amount: '' });
+      load();
+    } catch (err) {
+      setError(err.message);
+    }
+  };
+
+  const donate = async (event) => {
+    event.preventDefault();
+    const amount = parseInt(donationAmount);
+    if (!amount || amount <= 0) return;
+    try {
+      await request(`/api/v1/fundraisers/${selected.id}/donate`, {
+        method: 'POST',
+        body: JSON.stringify({ amount })
+      });
+      setSelected(null);
+      setDonationAmount('');
+      load();
+    } catch (err) {
+      setError(err.message);
+    }
+  };
+
+  return (
+    <div className="page-content">
+      <PageHeader
+        eyebrow="Back a bold idea"
+        title="Startup fundraisers"
+        text="Support student-led ideas and the people brave enough to build them."
+        action={(user.role === 'student' || user.role === 'admin') && (
+          <Button onClick={() => setShowCreate(true)}>
+            <Plus size={16} /> Start a campaign
+          </Button>
+        )}
+      />
+      {error && <Notice>{error}</Notice>}
+      {loading ? (
+        <Loader label="Loading campaigns" />
+      ) : items.length ? (
+        <div className="fundraiser-grid">
+          {items.map((item) => (
+            <article className="fundraiser-card" key={item.id}>
+              <div className="fundraiser-art">
+                <span>{initials(item.title)}</span>
+                <CircleDollarSign size={24} />
+              </div>
+              <div className="fundraiser-body">
+                <span className="eyebrow">Student venture</span>
+                <h3>{item.title}</h3>
+                <p>{item.description || 'A community-led campaign looking for its first supporters.'}</p>
+                <div className="fundraiser-progress">
+                  <span style={{ width: `${Math.min(100, ((item.raised_amount || item.current_amount || 0) / (item.goal_amount || 1)) * 100)}%` }} />
+                </div>
+                <div className="fundraiser-stats">
+                  <span><strong>₹{item.raised_amount || item.current_amount || 0}</strong> raised</span>
+                  <span>Goal ₹{item.goal_amount || '—'}</span>
+                </div>
+                <Button className="full-width" onClick={() => setSelected(item)}>
+                  View campaign <ArrowRight size={15} />
+                </Button>
+              </div>
+            </article>
+          ))}
+        </div>
+      ) : (
+        <EmptyState icon={CircleDollarSign} title="No campaigns yet" text="When a student venture is ready to raise, it will appear here." />
+      )}
+
+      {showCreate && (
+        <Modal title="Start a campaign" onClose={() => setShowCreate(false)}>
+          <form className="modal-form" onSubmit={createCampaign}>
+            <Field label="Campaign Title" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} required />
+            <Field label="Goal Amount (₹)" type="number" value={form.goal_amount} onChange={(e) => setForm({ ...form, goal_amount: e.target.value })} required />
+            <TextArea label="Description" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} required />
+            <div className="modal-actions">
+              <Button variant="secondary" type="button" onClick={() => setShowCreate(false)}>Cancel</Button>
+              <Button type="submit">Launch campaign</Button>
+            </div>
+          </form>
+        </Modal>
+      )}
+
+      {selected && (
+        <Modal title={`Support ${selected.title}`} onClose={() => setSelected(null)}>
+          <div className="modal-form">
+            <div style={{ marginBottom: '1.5rem' }}>
+              <strong>Description:</strong>
+              <p style={{ marginTop: '0.5rem', lineHeight: '1.5' }}>{selected.description}</p>
+            </div>
+            <div className="fundraiser-stats" style={{ marginBottom: '1.5rem', padding: '1rem', background: '#f5f5f5', borderRadius: '8px' }}>
+              <span><strong>₹{selected.raised_amount || selected.current_amount || 0}</strong> raised</span>
+              <span>Goal ₹{selected.goal_amount}</span>
+            </div>
+            <form onSubmit={donate}>
+              <Field label="Contribution Amount (₹)" type="number" value={donationAmount} onChange={(e) => setDonationAmount(e.target.value)} placeholder="Enter amount to donate" required />
+              <div className="modal-actions" style={{ marginTop: '1.5rem' }}>
+                <Button variant="secondary" type="button" onClick={() => setSelected(null)}>Cancel</Button>
+                <Button type="submit">Contribute now</Button>
+              </div>
+            </form>
+          </div>
+        </Modal>
+      )}
+    </div>
+  );
+}
 
 function Chat({ user, request }) {
   const [conversations, setConversations] = useState([]); const [active, setActive] = useState(null); const [messages, setMessages] = useState([]); const [search, setSearch] = useState(''); const [users, setUsers] = useState([]); const [text, setText] = useState(''); const [connected, setConnected] = useState(false); const socketRef = useRef(null); const reconnectRef = useRef(0); const loadConversations = useCallback(async () => { try { setConversations(await request('/api/v1/chat/conversations')); } catch { /* parent shell still stays usable */ } }, [request]); useEffect(() => { loadConversations(); }, [loadConversations]); useEffect(() => { let cancelled = false; if (!search.trim()) { setUsers([]); return undefined; } const timer = setTimeout(async () => { try { const result = await request(`/api/v1/chat/users/search?query=${encodeURIComponent(search)}`); if (!cancelled) setUsers(result); } catch { if (!cancelled) setUsers([]); } }, 250); return () => { cancelled = true; clearTimeout(timer); }; }, [search, request]);
