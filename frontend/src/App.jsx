@@ -183,13 +183,27 @@ function Jobs({ user, request }) {
 
 function Stories({ user, request }) { const [stories, setStories] = useState([]); const [loading, setLoading] = useState(true); const [error, setError] = useState(''); const [showCreate, setShowCreate] = useState(false); const [form, setForm] = useState({ title: '', content: '' }); const load = useCallback(async () => { try { setLoading(true); setStories(await request('/api/v1/stories')); } catch (err) { setError(err.message); } finally { setLoading(false); } }, [request]); useEffect(() => { load(); }, []); const create = async (event) => { event.preventDefault(); try { await request('/api/v1/stories', { method: 'POST', body: JSON.stringify(form) }); setForm({ title: '', content: '' }); setShowCreate(false); load(); } catch (err) { setError(err.message); } }; const like = async (id) => { try { const result = await request(`/api/v1/stories/${id}/like`, { method: 'POST' }); setStories((items) => items.map((story) => story.id === id ? { ...story, likes_count: result.likes_count } : story)); } catch (err) { setError(err.message); } }; return <div className="page-content"><PageHeader eyebrow="Learn from the journey" title="Success stories" text="Real paths, honest lessons, and the moments that made a difference." action={(user.role === 'alumni' || user.role === 'admin') && <Button onClick={() => setShowCreate(true)}><Plus size={16} /> Share your story</Button>} />{error && <Notice>{error}</Notice>}{loading ? <Loader label="Loading stories" /> : stories.length ? <div className="story-grid">{stories.map((story, index) => <article className={`story-card story-tone-${index % 3}`} key={story.id}><div className="story-card-top"><span className="story-number">0{index + 1}</span><span>{formatDate(story.created_at)}</span></div><h3>{story.title}</h3><p>{story.content}</p><div className="story-author"><span className="avatar-circle">{initials(story.author_name)}</span><span><strong>{story.author_name}</strong><small>Alumni community</small></span><button className="like-button" onClick={() => like(story.id)}><Heart size={15} /> {story.likes_count}</button></div></article>)}</div> : <EmptyState icon={BookOpen} title="The first story is yours" text="Share something that helped you take your next step." />}{showCreate && <Modal title="Share a success story" onClose={() => setShowCreate(false)}><form className="modal-form" onSubmit={create}><Field label="Title" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} placeholder="The introduction that changed everything" required /><TextArea label="Your story" value={form.content} onChange={(e) => setForm({ ...form, content: e.target.value })} placeholder="Tell the community what you learned…" required /><div className="modal-actions"><Button variant="secondary" type="button" onClick={() => setShowCreate(false)}>Cancel</Button><Button type="submit">Publish story</Button></div></form></Modal>}</div>; }
 
-function Events({ user, request }) {
+function Events({ user, request, onStartChat }) {
   const [events, setEvents] = useState([]);
   const [selected, setSelected] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [showCreate, setShowCreate] = useState(false);
   const [form, setForm] = useState({ title: '', description: '', location: '', date: '' });
+  const [attendees, setAttendees] = useState([]);
+  const [loadingAttendees, setLoadingAttendees] = useState(false);
+
+  useEffect(() => {
+    if (selected && (user.role === 'admin' || user.role === 'faculty')) {
+      setLoadingAttendees(true);
+      request(`/api/v1/bulletin-events/${selected.id}/attendees`)
+        .then((data) => setAttendees(data || []))
+        .catch(() => setAttendees([]))
+        .finally(() => setLoadingAttendees(false));
+    } else {
+      setAttendees([]);
+    }
+  }, [selected, user.role, request]);
 
   const load = useCallback(async (currentSelected = selected) => {
     try {
@@ -293,6 +307,39 @@ function Events({ user, request }) {
                 <div className="event-cta">
                   <Button onClick={register} disabled={selected.is_registered} variant={selected.is_registered ? 'secondary' : 'primary'}>{selected.is_registered ? '✓ Registered' : 'Register for this event'} {!selected.is_registered && <ArrowRight size={15} />}</Button>
                 </div>
+                {(user.role === 'admin' || user.role === 'faculty') && (
+                  <div className="attendees-section" style={{ marginTop: '2rem' }}>
+                    <h3 style={{ fontSize: '1rem', fontWeight: '600', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#111827' }}>
+                      <Users size={16} /> Registered Attendees ({attendees.length})
+                    </h3>
+                    {loadingAttendees ? (
+                      <Loader label="Loading attendees" />
+                    ) : attendees.length ? (
+                      <div className="attendees-list" style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                        {attendees.map((attendee) => (
+                          <div key={attendee.id} className="attendee-item" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.5rem 0.75rem', background: '#f9fafb', borderRadius: '8px', border: '1px solid #f3f4f6' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                              <span className="avatar-circle small">{initials(attendee.full_name)}</span>
+                              <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                <strong style={{ fontSize: '0.85rem', color: '#1f2937' }}>{attendee.full_name}</strong>
+                                <small style={{ fontSize: '0.75rem', color: '#6b7280' }}>{attendee.role} · {attendee.email}</small>
+                              </div>
+                            </div>
+                            <Button 
+                              variant="outline" 
+                              style={{ padding: '0.25rem 0.5rem', fontSize: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.25rem', height: 'auto' }}
+                              onClick={() => onStartChat(attendee.id)}
+                            >
+                              <MessageCircle size={12} /> Contact
+                            </Button>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <p style={{ fontSize: '0.8rem', color: '#6b7280', fontStyle: 'italic' }}>No attendees registered yet.</p>
+                    )}
+                  </div>
+                )}
               </>
             ) : (
               <EmptyState icon={CalendarDays} title="Choose an event" text="Select a bulletin item to see details." />
@@ -692,7 +739,7 @@ export default function App() {
     jobs: <Jobs user={user} request={request} />,
     stories: <Stories user={user} request={request} />,
     fundraisers: <Fundraisers user={user} request={request} />,
-    events: <Events user={user} request={request} />,
+    events: <Events user={user} request={request} onStartChat={(authorId) => { request('/api/v1/chat/conversations', { method: 'POST', body: JSON.stringify({ recipient_id: authorId }) }).then((conversation) => { setChatActiveId(conversation.id); }).finally(() => setPage('chat')); }} />,
     chat: <Chat user={user} request={request} initialActiveId={chatActiveId} clearInitialActiveId={() => setChatActiveId(null)} />,
     admin: <Admin request={request} />,
     profile: <Profile user={user} onLogout={logout} />
