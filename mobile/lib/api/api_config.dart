@@ -4,7 +4,7 @@ class ApiConfig {
 
   /// Base URL placeholder as requested.
   /// Easily editable for local dev (http://10.0.2.2:8000/api/v1 or http://localhost:8000/api/v1) or production.
-  static const String baseUrl = 'https://<your-api-host>/api/v1';
+  static const String baseUrl = 'https://alumnix-backend-production.up.railway.app/api/v1';
 
   // Network Timeouts
   static const Duration connectTimeout = Duration(seconds: 15);
