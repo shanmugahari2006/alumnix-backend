@@ -21,6 +21,10 @@ class JobListing(Base):
     creator = relationship("User")
     applications = relationship("JobApplication", back_populates="job", cascade="all, delete-orphan")
 
+    @property
+    def creator_name(self):
+        return self.creator.full_name if self.creator else "Alumnix Member"
+
 class JobApplication(Base):
     __tablename__ = "job_applications"
     

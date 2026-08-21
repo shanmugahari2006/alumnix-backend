@@ -38,7 +38,7 @@ class JobService:
         """
         Retrieves all job listings with title, company, or job_type filtering.
         """
-        query = select(JobListing)
+        query = select(JobListing).options(selectinload(JobListing.creator))
         filters = []
         if title:
             filters.append(JobListing.title.ilike(f"%{title}%"))

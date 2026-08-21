@@ -21,6 +21,7 @@ class JobResponse(BaseModel):
     job_type: str
     salary: Optional[str]
     creator_id: uuid.UUID
+    creator_name: Optional[str] = None
     created_at: datetime
     updated_at: datetime
     model_config = {"from_attributes": True}
