@@ -1,9 +1,11 @@
 import uuid
 from typing import List
 from fastapi import APIRouter, Depends, status
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.database import get_db
 from app.models.user import User
+from app.models.story import StoryLike
 from app.schemas.story import StoryCreate, StoryResponse, LikeToggleResponse
 from app.services.story_service import StoryService
 from app.dependencies import get_current_user, require_role
@@ -31,11 +33,21 @@ async def create_story(
     )
 
 @router.get("", response_model=List[StoryResponse])
-async def list_stories(db: AsyncSession = Depends(get_db)):
+async def list_stories(
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
     """
     Get the feed of success stories ordered by created_at descending.
     """
     stories = await StoryService.list_stories(db)
+    
+    # Query liked stories by the current user
+    like_res = await db.execute(
+        select(StoryLike.story_id).where(StoryLike.user_id == current_user.id)
+    )
+    liked_ids = set(like_res.scalars().all())
+    
     return [
         StoryResponse(
             id=s.id,
@@ -44,7 +56,8 @@ async def list_stories(db: AsyncSession = Depends(get_db)):
             author_id=s.author_id,
             likes_count=s.likes_count,
             created_at=s.created_at,
-            author_name=s.author.full_name
+            author_name=s.author.full_name,
+            is_liked=(s.id in liked_ids)
         )
         for s in stories
     ]

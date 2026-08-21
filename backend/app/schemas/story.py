@@ -14,6 +14,7 @@ class StoryResponse(BaseModel):
     likes_count: int
     created_at: datetime
     author_name: str
+    is_liked: bool = False
     model_config = {"from_attributes": True}
 
 class LikeToggleResponse(BaseModel):
