@@ -10,6 +10,9 @@ from app.routes.stories import router as stories_router
 from app.routes.donations import router as donations_router
 from app.routes.uploads import router as uploads_router
 from app.routes.admin import router as admin_router
+from app.routes.fundraisers import router as fundraisers_router
+from app.routes.chat import router as chat_router
+from app.routes.meetings import router as meetings_router
 from app.database import engine, Base
 import app.models  # Import to register models on Base.metadata
 
@@ -87,12 +90,25 @@ app.include_router(phone_router, prefix="/api/v1/auth", tags=["Phone Authenticat
 
 app.include_router(alumni_router, prefix="/api/v1/alumni", tags=["Alumni Directory"])
 app.include_router(jobs_router, prefix="/api/v1/jobs", tags=["Job Portal"])
+app.include_router(events_router, prefix="/api/v1/bulletin-events", tags=["Events"])
 app.include_router(events_router, prefix="/api/v1/events", tags=["Events"])
 app.include_router(stories_router, prefix="/api/v1/stories", tags=["Success Stories"])
 app.include_router(donations_router, prefix="/api/v1/donations", tags=["Donations"])
 app.include_router(uploads_router, prefix="/api/v1/upload", tags=["Uploads"])
 app.include_router(admin_router, prefix="/api/v1/admin", tags=["Admin"])
+app.include_router(fundraisers_router, prefix="/api/v1/fundraisers", tags=["Fundraisers"])
+app.include_router(chat_router, prefix="/api/v1/chat", tags=["Chat"])
+app.include_router(meetings_router, prefix="/api/v1/meetings", tags=["Meetings"])
 
 @app.get("/health")
 async def health_check():
     return {"status": "ok", "app": "AlumniConnect"}
+
+import os
+from fastapi.staticfiles import StaticFiles
+
+# Serve compiled frontend React assets if they exist
+static_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "static")
+if os.path.exists(static_path):
+    app.mount("/", StaticFiles(directory=static_path, html=True), name="static")
+

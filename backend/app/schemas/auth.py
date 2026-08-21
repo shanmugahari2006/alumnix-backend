@@ -24,10 +24,18 @@ class UserLogin(BaseModel):
 
     @field_validator("email")
     @classmethod
-    def validate_email(cls, v: str) -> str:
+    def validate_email_or_phone(cls, v: str) -> str:
         v = v.strip().lower()
-        if not EMAIL_REGEX.match(v):
-            raise ValueError("Invalid email format")
+        if "@" in v:
+            if not EMAIL_REGEX.match(v):
+                raise ValueError("Invalid email format")
+            return v
+        
+        # Phone number validation: extract only digits
+        phone_clean = re.sub(r"\D", "", v)
+        if len(phone_clean) >= 10:
+            return phone_clean[-10:] # Return only the last 10 numbers
+        raise ValueError("Must be a valid email or 10-digit phone number")
         return v
 
 class TokenResponse(BaseModel):

@@ -33,3 +33,28 @@ def decode_token(token: str) -> dict:
         return payload
     except JWTError as e:
         raise ValueError("Invalid token") from e
+
+def create_jitsi_token(
+    room_name: str,
+    user_id: str,
+    user_name: str,
+    user_email: str
+) -> str:
+    expire = datetime.now(timezone.utc) + timedelta(hours=2)
+    nbf = datetime.now(timezone.utc) - timedelta(minutes=5)
+    payload = {
+        "aud": settings.JITSI_APP_ID,
+        "iss": settings.JITSI_APP_ID,
+        "sub": settings.JITSI_DOMAIN,
+        "room": room_name,
+        "exp": expire,
+        "nbf": nbf,
+        "context": {
+            "user": {
+                "id": user_id,
+                "name": user_name,
+                "email": user_email
+            }
+        }
+    }
+    return jwt.encode(payload, settings.JITSI_APP_SECRET, algorithm="HS256")

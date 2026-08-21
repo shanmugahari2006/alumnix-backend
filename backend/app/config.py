@@ -60,6 +60,10 @@ class Settings(BaseSettings):
     SMTP_FROM: str = "noreply@alumniconnect.com"
     SUPABASE_URL: str
     SUPABASE_KEY: str
+    JITSI_APP_ID: str = ""
+    JITSI_APP_SECRET: str = ""
+    JITSI_DOMAIN: str = ""
+    FIREBASE_CREDENTIALS_PATH: str = ""
 
 settings = Settings()
 

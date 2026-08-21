@@ -195,7 +195,7 @@ async def login(payload: UserLogin, db: AsyncSession = Depends(get_db)):
     Checks status validation and moderation approval flags based on role.
     """
     query = select(User).where(
-        (User.email == payload.email) | (User.phone_number == payload.email)
+        (User.email == payload.email) | (User.phone_number.endswith(payload.email))
     )
     result = await db.execute(query)
     user = result.scalars().first()
