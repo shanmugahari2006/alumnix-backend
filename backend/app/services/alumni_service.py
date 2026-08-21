@@ -2,6 +2,7 @@ import uuid
 from typing import List, Optional
 from fastapi import HTTPException
 from sqlalchemy import func, String, or_, and_, select
+from sqlalchemy.orm import joinedload
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.models.user import User, Alumni
 from app.schemas.alumni import AlumniProfileUpdate
@@ -23,7 +24,7 @@ class AlumniService:
         """
         # Base count and query
         count_query = select(func.count(Alumni.id)).join(User).where(Alumni.is_approved == True, User.is_active == True)
-        query = select(Alumni).join(User).where(Alumni.is_approved == True, User.is_active == True)
+        query = select(Alumni).join(User).options(joinedload(Alumni.user)).where(Alumni.is_approved == True, User.is_active == True)
         
         # Build filter predicates
         filters = []
@@ -85,7 +86,7 @@ class AlumniService:
         """
         Approves an alumni user and triggers a mock notification.
         """
-        result = await db.execute(select(Alumni).where(Alumni.id == alumni_id).join(User))
+        result = await db.execute(select(Alumni).where(Alumni.id == alumni_id).join(User).options(joinedload(Alumni.user)))
         alumni = result.scalars().first()
         if not alumni:
             raise HTTPException(status_code=404, detail="Alumni profile not found")
