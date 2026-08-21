@@ -1,9 +1,11 @@
 import uuid
 from typing import List
 from fastapi import APIRouter, Depends, status
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.database import get_db
 from app.models.user import User
+from app.models.event import EventRegistration
 from app.schemas.event import EventCreate, EventResponse, EventRegistrationResponse, AttendeeDetail
 from app.services.event_service import EventService
 from app.dependencies import get_current_user, require_role
@@ -22,11 +24,35 @@ async def create_event(
     return await EventService.create_event(db, payload, current_user.id)
 
 @router.get("", response_model=List[EventResponse])
-async def list_events(db: AsyncSession = Depends(get_db)):
+async def list_events(
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
     """
     List all events ordered by date descending.
     """
-    return await EventService.list_events(db)
+    events = await EventService.list_events(db)
+    
+    # Query registrations for the current user
+    reg_res = await db.execute(
+        select(EventRegistration.event_id).where(EventRegistration.user_id == current_user.id)
+    )
+    registered_ids = set(reg_res.scalars().all())
+    
+    # Map the events
+    return [
+        EventResponse(
+            id=e.id,
+            title=e.title,
+            description=e.description,
+            date=e.date,
+            location=e.location,
+            creator_id=e.creator_id,
+            created_at=e.created_at,
+            is_registered=(e.id in registered_ids)
+        )
+        for e in events
+    ]
 
 @router.post("/{event_id}/register", response_model=EventRegistrationResponse, status_code=status.HTTP_201_CREATED)
 async def register_for_event(

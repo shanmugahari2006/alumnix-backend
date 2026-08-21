@@ -16,6 +16,7 @@ class EventResponse(BaseModel):
     location: str
     creator_id: uuid.UUID
     created_at: datetime
+    is_registered: bool = False
     model_config = {"from_attributes": True}
 
 class EventRegistrationResponse(BaseModel):

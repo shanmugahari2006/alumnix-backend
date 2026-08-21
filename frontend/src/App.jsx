@@ -191,16 +191,21 @@ function Events({ user, request }) {
   const [showCreate, setShowCreate] = useState(false);
   const [form, setForm] = useState({ title: '', description: '', location: '', date: '' });
 
-  const load = useCallback(async () => {
+  const load = useCallback(async (currentSelected = selected) => {
     try {
       setLoading(true);
-      setEvents(await request('/api/v1/bulletin-events'));
+      const list = await request('/api/v1/bulletin-events');
+      setEvents(list);
+      if (currentSelected) {
+        const updated = list.find((e) => e.id === currentSelected.id);
+        if (updated) setSelected(updated);
+      }
     } catch (err) {
       setError(err.message);
     } finally {
       setLoading(false);
     }
-  }, [request]);
+  }, [request, selected]);
 
   useEffect(() => { load(); }, []);
 
@@ -227,7 +232,8 @@ function Events({ user, request }) {
   const register = async () => {
     try {
       await request(`/api/v1/bulletin-events/${selected.id}/register`, { method: 'POST' });
-      load();
+      setSelected((curr) => curr ? { ...curr, is_registered: true } : null);
+      load(selected);
     } catch (err) {
       setError(err.message);
     }
@@ -285,7 +291,7 @@ function Events({ user, request }) {
                 </div>
                 <p>{selected.description}</p>
                 <div className="event-cta">
-                  <Button onClick={register}>Register for this event <ArrowRight size={15} /></Button>
+                  <Button onClick={register} disabled={selected.is_registered} variant={selected.is_registered ? 'secondary' : 'primary'}>{selected.is_registered ? '✓ Registered' : 'Register for this event'} {!selected.is_registered && <ArrowRight size={15} />}</Button>
                 </div>
               </>
             ) : (
