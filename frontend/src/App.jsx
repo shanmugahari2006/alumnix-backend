@@ -164,7 +164,41 @@ function Overview({ user, goTo, request }) {
 
 function Directory({ user, request, onStartChat }) {
   const [filters, setFilters] = useState({ query: '', branch: '', graduation_year: '', location: '', skills: '' }); const [data, setData] = useState({ results: [], total: 0 }); const [state, setState] = useState({ loading: true, error: '' }); const [editing, setEditing] = useState(false); const [profile, setProfile] = useState({ company: '', designation: '', location: '', linkedin_url: '', skills: '', branch: '' });
-  const load = useCallback(async () => { setState({ loading: true, error: '' }); try { const params = new URLSearchParams({ page: '1', limit: '30' }); Object.entries(filters).forEach(([key, value]) => value && params.set(key, value)); const result = await request(`/api/v1/alumni?${params}`); setData(result); } catch (err) { setState({ loading: false, error: err.message }); return; } setState({ loading: false, error: '' }); }, [filters, request]); useEffect(() => { load(); }, []);
+  const load = useCallback(async () => {
+    setState({ loading: true, error: '' });
+    try {
+      const params = new URLSearchParams();
+      params.set('page', '1');
+      params.set('limit', '30');
+      if (filters.query.trim()) {
+        params.set('search', filters.query.trim());
+      }
+      if (filters.branch.trim()) {
+        params.set('branch', filters.branch.trim());
+      }
+      if (filters.location.trim()) {
+        params.set('location', filters.location.trim());
+      }
+      if (filters.graduation_year.trim()) {
+        const batchNum = parseInt(filters.graduation_year.trim(), 10);
+        if (!isNaN(batchNum)) {
+          params.set('batch', batchNum);
+        }
+      }
+      if (filters.skills.trim()) {
+        filters.skills.split(',')
+          .map(s => s.trim())
+          .filter(Boolean)
+          .forEach(s => params.append('skills', s));
+      }
+      const result = await request(`/api/v1/alumni?${params.toString()}`);
+      setData(result);
+    } catch (err) {
+      setState({ loading: false, error: err.message });
+      return;
+    }
+    setState({ loading: false, error: '' });
+  }, [filters, request]); useEffect(() => { load(); }, []);
   const saveProfile = async (event) => { event.preventDefault(); try { await request('/api/v1/alumni/profile', { method: 'PUT', body: JSON.stringify({ ...profile, skills: profile.skills.split(',').map((item) => item.trim()).filter(Boolean) }) }); setEditing(false); } catch (err) { setState((s) => ({ ...s, error: err.message })); } };
   return <div className="page-content"><PageHeader eyebrow="People like you" title="Alumni directory" text="Search the full community by experience, cohort, and shared interests." action={<Button onClick={() => setEditing(true)}><Pencil size={15} /> Edit my profile</Button>} /><div className="filter-bar"><div className="search-input"><Search size={16} /><input value={filters.query} onChange={(e) => setFilters({ ...filters, query: e.target.value })} onKeyDown={(e) => e.key === 'Enter' && load()} placeholder="Search by name, company, or skill" /></div><input value={filters.branch} onChange={(e) => setFilters({ ...filters, branch: e.target.value })} placeholder="Branch" /><input value={filters.graduation_year} onChange={(e) => setFilters({ ...filters, graduation_year: e.target.value })} placeholder="Graduation year" /><input value={filters.location} onChange={(e) => setFilters({ ...filters, location: e.target.value })} placeholder="Location" /><Button variant="secondary" onClick={load}><SlidersHorizontal size={15} /> Apply filters</Button></div>{state.error && <Notice>{state.error}</Notice>}{state.loading ? <Loader label="Loading alumni" /> : data.results?.length ? <div className="directory-grid">{data.results.filter((person) => person.id !== user.id).map((person) => <article className="person-card" key={person.id}><div className="person-card-top"><span className="avatar-circle large">{initials(person.full_name)}</span><span className="person-status"><span /> Active</span></div><h3>{person.full_name}</h3><p className="person-role">{person.designation || 'Alumni member'}{person.company ? ` · ${person.company}` : ''}</p><div className="person-meta"><span><GraduationCap size={13} /> {person.branch || 'Community'} · {person.graduation_year || '—'}</span><span><MapPin size={13} /> {person.location || 'Location private'}</span></div><div className="tag-row">{(person.skills || []).slice(0, 3).map((skill) => <span key={skill}>{skill}</span>)}</div><Button variant="outline" className="full-width" onClick={() => onStartChat(person)}><MessageCircle size={15} /> Start a conversation</Button></article>)}</div> : <EmptyState icon={Users} title="No members found" text="Try a wider search or check another graduating year." />}{editing && <Modal title="Update your profile" onClose={() => setEditing(false)}><form className="modal-form" onSubmit={saveProfile}><Field label="Company" value={profile.company} onChange={(e) => setProfile({ ...profile, company: e.target.value })} /><Field label="Designation" value={profile.designation} onChange={(e) => setProfile({ ...profile, designation: e.target.value })} /><div className="two-fields"><Field label="Location" value={profile.location} onChange={(e) => setProfile({ ...profile, location: e.target.value })} /><Field label="Branch" value={profile.branch} onChange={(e) => setProfile({ ...profile, branch: e.target.value })} /></div><Field label="LinkedIn URL" value={profile.linkedin_url} onChange={(e) => setProfile({ ...profile, linkedin_url: e.target.value })} /><Field label="Skills" value={profile.skills} onChange={(e) => setProfile({ ...profile, skills: e.target.value })} hint="Separate skills with commas." /><div className="modal-actions"><Button variant="secondary" type="button" onClick={() => setEditing(false)}>Cancel</Button><Button type="submit">Save profile</Button></div></form></Modal>}</div>;
 }
@@ -310,13 +344,13 @@ function Events({ user, request, onStartChat }) {
                 {(user.role === 'admin' || user.role === 'faculty') && (
                   <div className="attendees-section" style={{ marginTop: '2rem' }}>
                     <h3 style={{ fontSize: '1rem', fontWeight: '600', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#111827' }}>
-                      <Users size={16} /> Registered Attendees ({attendees.length})
+                      <Users size={16} /> Registered Attendees ({attendees.filter((attendee) => attendee.id !== user.id).length})
                     </h3>
                     {loadingAttendees ? (
                       <Loader label="Loading attendees" />
                     ) : attendees.length ? (
                       <div className="attendees-list" style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                        {attendees.map((attendee) => (
+                        {attendees.filter((attendee) => attendee.id !== user.id).map((attendee) => (
                           <div key={attendee.id} className="attendee-item" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.5rem 0.75rem', background: '#f9fafb', borderRadius: '8px', border: '1px solid #f3f4f6' }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                               <span className="avatar-circle small">{initials(attendee.full_name)}</span>
