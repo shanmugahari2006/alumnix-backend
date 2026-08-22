@@ -13,6 +13,7 @@ from app.routes.admin import router as admin_router
 from app.routes.fundraisers import router as fundraisers_router
 from app.routes.chat import router as chat_router
 from app.routes.meetings import router as meetings_router
+from app.routes.calls import router as calls_router
 from app.database import engine, Base
 import app.models  # Import to register models on Base.metadata
 
@@ -99,6 +100,7 @@ app.include_router(admin_router, prefix="/api/v1/admin", tags=["Admin"])
 app.include_router(fundraisers_router, prefix="/api/v1/fundraisers", tags=["Fundraisers"])
 app.include_router(chat_router, prefix="/api/v1/chat", tags=["Chat"])
 app.include_router(meetings_router, prefix="/api/v1/meetings", tags=["Meetings"])
+app.include_router(calls_router, tags=["WebRTC Calls"])
 
 @app.get("/health")
 async def health_check():
