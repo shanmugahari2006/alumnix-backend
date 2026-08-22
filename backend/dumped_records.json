@@ -1,0 +1,988 @@
+{
+  "registered_users": [
+    {
+      "id": "1550f56b-cfb9-491e-8642-72076088c1d4",
+      "name": "Alice Student",
+      "email": "test_student@college.com",
+      "phone_number": "+917777777777",
+      "role": "student",
+      "is_active": true,
+      "profile": {
+        "usn": "1RV20CS999",
+        "branch": "Computer Science",
+        "graduation_year": 2026
+      }
+    },
+    {
+      "id": "424775ea-c329-4563-8f33-f2eee5228cea",
+      "name": "Dr. Bob Faculty",
+      "email": "test_faculty@college.com",
+      "phone_number": "+918888888888",
+      "role": "faculty",
+      "is_active": true,
+      "profile": {}
+    },
+    {
+      "id": "c856c2d5-c1ad-437a-8cbb-afeda0183f58",
+      "name": "Charlie Cohost",
+      "email": "test_cohost@college.com",
+      "phone_number": "+916666666666",
+      "role": "student",
+      "is_active": true,
+      "profile": {}
+    },
+    {
+      "id": "dfeb685d-519b-4a42-b7fb-970cb5dc6f27",
+      "name": "Munir Student",
+      "email": "student@college.com",
+      "phone_number": "+919876543210",
+      "role": "student",
+      "is_active": true,
+      "profile": {
+        "usn": "1RV20CS001",
+        "branch": "Computer Science",
+        "graduation_year": 2026
+      }
+    },
+    {
+      "id": "a3ec1957-ed97-437b-a198-d172fad3901e",
+      "name": "Alumni User",
+      "email": "alumni@college.com",
+      "phone_number": "+918765432109",
+      "role": "alumni",
+      "is_active": true,
+      "profile": {
+        "usn": "1RV20CS002",
+        "company": null,
+        "designation": null,
+        "graduation_year": 2020,
+        "branch": "Computer Science",
+        "location": null,
+        "linkedin_url": null,
+        "skills": null,
+        "is_approved": true
+      }
+    },
+    {
+      "id": "0778c8f0-84ff-40d6-a31e-07f15c18bf56",
+      "name": "System Administrator",
+      "email": "admin@college.com",
+      "phone_number": "+919999999999",
+      "role": "admin",
+      "is_active": true,
+      "profile": {}
+    },
+    {
+      "id": "c5720802-a52f-40de-adf9-a25a4be70908",
+      "name": "Dr. Priya Nair",
+      "email": "faculty@college.com",
+      "phone_number": null,
+      "role": "faculty",
+      "is_active": true,
+      "profile": {
+        "employee_id": "FAC-CS-101",
+        "department": "Computer Science",
+        "designation": "Associate Professor",
+        "is_approved": true
+      }
+    },
+    {
+      "id": "ce7b0dab-1c6f-40d3-a87f-40dbd1c86efd",
+      "name": "Sarah Chen",
+      "email": "sarah.chen@alumni.edu",
+      "phone_number": null,
+      "role": "alumni",
+      "is_active": true,
+      "profile": {
+        "usn": null,
+        "company": "Google",
+        "designation": "Senior Software Engineer",
+        "graduation_year": 2020,
+        "branch": "Computer Science",
+        "location": "San Francisco, CA",
+        "linkedin_url": null,
+        "skills": [
+          "Distributed Systems",
+          "Go",
+          "Kubernetes"
+        ],
+        "is_approved": true
+      }
+    },
+    {
+      "id": "52e8a73c-0906-426b-9006-bdc50834a7ed",
+      "name": "Rohan Mehta",
+      "email": "rohan.m@alumni.edu",
+      "phone_number": null,
+      "role": "alumni",
+      "is_active": true,
+      "profile": {
+        "usn": null,
+        "company": "Microsoft",
+        "designation": "Product Manager 2",
+        "graduation_year": 2019,
+        "branch": "Information Science",
+        "location": "Bengaluru, India",
+        "linkedin_url": null,
+        "skills": [
+          "Product Strategy",
+          "Cloud",
+          "Azure"
+        ],
+        "is_approved": true
+      }
+    },
+    {
+      "id": "b83a8158-d450-4435-83d9-873935cf441a",
+      "name": "Priya Sharma",
+      "email": "priya@alumni.edu",
+      "phone_number": null,
+      "role": "alumni",
+      "is_active": true,
+      "profile": {
+        "usn": null,
+        "company": "AgriTech Labs",
+        "designation": "CEO & Co-Founder",
+        "graduation_year": 2018,
+        "branch": "Electronics & Communication",
+        "location": "Singapore",
+        "linkedin_url": null,
+        "skills": [
+          "Startups",
+          "IoT",
+          "Fundraising"
+        ],
+        "is_approved": true
+      }
+    },
+    {
+      "id": "924ff125-eabd-48b5-b2e4-d6cadd7b4ee1",
+      "name": "David Kim",
+      "email": "david.kim@alumni.edu",
+      "phone_number": null,
+      "role": "alumni",
+      "is_active": true,
+      "profile": {
+        "usn": null,
+        "company": "Amazon Web Services",
+        "designation": "Solutions Architect",
+        "graduation_year": 2021,
+        "branch": "Computer Science",
+        "location": "Seattle, WA",
+        "linkedin_url": null,
+        "skills": [
+          "AWS",
+          "Serverless",
+          "DevOps"
+        ],
+        "is_approved": true
+      }
+    },
+    {
+      "id": "61a3d470-4e13-4938-87fe-c3e2cb223959",
+      "name": "Ananya Verma",
+      "email": "ananya.v@alumni.edu",
+      "phone_number": null,
+      "role": "alumni",
+      "is_active": true,
+      "profile": {
+        "usn": null,
+        "company": "Stripe",
+        "designation": "Frontend Engineer",
+        "graduation_year": 2022,
+        "branch": "Computer Science",
+        "location": "Dublin, Ireland",
+        "linkedin_url": null,
+        "skills": [
+          "React",
+          "TypeScript",
+          "UI/UX"
+        ],
+        "is_approved": true
+      }
+    },
+    {
+      "id": "3655f236-8919-4771-839c-c2802b322255",
+      "name": "Vikram Patel",
+      "email": "vikram.p@alumni.edu",
+      "phone_number": null,
+      "role": "alumni",
+      "is_active": true,
+      "profile": {
+        "usn": null,
+        "company": "Goldman Sachs",
+        "designation": "Quantitative Analyst",
+        "graduation_year": 2017,
+        "branch": "Mechanical Engineering",
+        "location": "New York, NY",
+        "linkedin_url": null,
+        "skills": [
+          "Financial Modeling",
+          "Python",
+          "Algorithmic Trading"
+        ],
+        "is_approved": true
+      }
+    },
+    {
+      "id": "da91b5bf-7f48-462b-abb5-06e37006be6c",
+      "name": "Dasthagiri C",
+      "email": null,
+      "phone_number": "08660417872",
+      "role": "faculty",
+      "is_active": true,
+      "profile": {
+        "employee_id": "18577",
+        "department": "Computer Science and Engineering",
+        "designation": "Professor",
+        "is_approved": false
+      }
+    },
+    {
+      "id": "62bd532b-4d99-44fe-b20d-38f36e85bf4c",
+      "name": "Aditya Sharma",
+      "email": "aditya.sharma@college.com",
+      "phone_number": "+919001002001",
+      "role": "student",
+      "is_active": true,
+      "profile": {
+        "usn": "1RV21CS001",
+        "branch": "Computer Science",
+        "graduation_year": 2025
+      }
+    },
+    {
+      "id": "dde1e495-553f-439b-bd03-ca1df3330da9",
+      "name": "Bhavya Reddy",
+      "email": "bhavya.reddy@college.com",
+      "phone_number": "+919001002002",
+      "role": "student",
+      "is_active": true,
+      "profile": {
+        "usn": "1RV21CS002",
+        "branch": "Computer Science",
+        "graduation_year": 2025
+      }
+    },
+    {
+      "id": "c1fcddc0-52f2-4428-8cfc-66942603b535",
+      "name": "Chaitanya Kumar",
+      "email": "chaitanya.k@college.com",
+      "phone_number": "+919001002003",
+      "role": "student",
+      "is_active": true,
+      "profile": {
+        "usn": "1RV21CS003",
+        "branch": "Information Science",
+        "graduation_year": 2025
+      }
+    },
+    {
+      "id": "4f48dc4c-786a-4807-84b3-4dbfcb7765da",
+      "name": "Divya Nair",
+      "email": "divya.nair@college.com",
+      "phone_number": "+919001002004",
+      "role": "student",
+      "is_active": true,
+      "profile": {
+        "usn": "1RV21IS001",
+        "branch": "Information Science",
+        "graduation_year": 2025
+      }
+    },
+    {
+      "id": "37959c07-e53a-49bf-8e2b-be327cad71c8",
+      "name": "Eshwar Prasad",
+      "email": "eshwar.p@college.com",
+      "phone_number": "+919001002005",
+      "role": "student",
+      "is_active": true,
+      "profile": {
+        "usn": "1RV21EC001",
+        "branch": "Electronics",
+        "graduation_year": 2025
+      }
+    },
+    {
+      "id": "5ff29093-7e2c-4c1e-9777-23637859f24d",
+      "name": "Farhan Khan",
+      "email": "farhan.khan@college.com",
+      "phone_number": "+919001002006",
+      "role": "student",
+      "is_active": true,
+      "profile": {
+        "usn": "1RV21EC002",
+        "branch": "Electronics",
+        "graduation_year": 2025
+      }
+    },
+    {
+      "id": "af200c0f-9914-421e-a23b-aa20b62deea9",
+      "name": "Gauri Deshmukh",
+      "email": "gauri.d@college.com",
+      "phone_number": "+919001002007",
+      "role": "student",
+      "is_active": true,
+      "profile": {
+        "usn": "1RV21ME001",
+        "branch": "Mechanical",
+        "graduation_year": 2026
+      }
+    },
+    {
+      "id": "ecbda26c-5173-441f-9c12-3d00401b47a2",
+      "name": "Harish Iyer",
+      "email": "harish.iyer@college.com",
+      "phone_number": "+919001002008",
+      "role": "student",
+      "is_active": true,
+      "profile": {
+        "usn": "1RV21ME002",
+        "branch": "Mechanical",
+        "graduation_year": 2026
+      }
+    },
+    {
+      "id": "e096906d-b2c3-456f-8ac1-7b8bb0dd2c09",
+      "name": "Indu Gopal",
+      "email": "indu.gopal@college.com",
+      "phone_number": "+919001002009",
+      "role": "student",
+      "is_active": true,
+      "profile": {
+        "usn": "1RV21CV001",
+        "branch": "Civil Engineering",
+        "graduation_year": 2026
+      }
+    },
+    {
+      "id": "7cacddfa-8e75-44fb-938b-2499168eb707",
+      "name": "Jayant Patel",
+      "email": "jayant.patel@college.com",
+      "phone_number": "+919001002010",
+      "role": "student",
+      "is_active": true,
+      "profile": {
+        "usn": "1RV21CV002",
+        "branch": "Civil Engineering",
+        "graduation_year": 2026
+      }
+    },
+    {
+      "id": "1d307c94-6aeb-4f36-bde2-edafeaee7bf8",
+      "name": "Kavya Murthy",
+      "email": "kavya.murthy@college.com",
+      "phone_number": "+919001002011",
+      "role": "student",
+      "is_active": true,
+      "profile": {
+        "usn": "1RV22CS001",
+        "branch": "Computer Science",
+        "graduation_year": 2026
+      }
+    },
+    {
+      "id": "5f6d95be-f985-4952-a0f2-cb8aacc01f62",
+      "name": "Lokesh Gowda",
+      "email": "lokesh.gowda@college.com",
+      "phone_number": "+919001002012",
+      "role": "student",
+      "is_active": true,
+      "profile": {
+        "usn": "1RV22CS002",
+        "branch": "Computer Science",
+        "graduation_year": 2026
+      }
+    },
+    {
+      "id": "61b133fa-7025-4e8d-9448-f2f4bdc5b122",
+      "name": "Meera Sen",
+      "email": "meera.sen@college.com",
+      "phone_number": "+919001002013",
+      "role": "student",
+      "is_active": true,
+      "profile": {
+        "usn": "1RV22IS001",
+        "branch": "Information Science",
+        "graduation_year": 2026
+      }
+    },
+    {
+      "id": "28e5c51d-5f48-4fcb-9fd5-821b6b47a71e",
+      "name": "Nikhil Verma",
+      "email": "nikhil.verma@college.com",
+      "phone_number": "+919001002014",
+      "role": "student",
+      "is_active": true,
+      "profile": {
+        "usn": "1RV22EC001",
+        "branch": "Electronics",
+        "graduation_year": 2026
+      }
+    },
+    {
+      "id": "b99f22d1-48c2-4d6e-b4cf-a278ee08ff31",
+      "name": "Ojas Gupta",
+      "email": "ojas.gupta@college.com",
+      "phone_number": "+919001002015",
+      "role": "student",
+      "is_active": true,
+      "profile": {
+        "usn": "1RV22ME001",
+        "branch": "Mechanical",
+        "graduation_year": 2026
+      }
+    },
+    {
+      "id": "7eb8cdda-581a-4a0a-bacb-652e0b73c6dc",
+      "name": "Rahul Dravid",
+      "email": "rahul.d@alumni.com",
+      "phone_number": "+918001002001",
+      "role": "alumni",
+      "is_active": true,
+      "profile": {
+        "usn": "1RV15CS001",
+        "company": "Google",
+        "designation": "Senior Staff Engineer",
+        "graduation_year": 2019,
+        "branch": "Computer Science",
+        "location": "Bengaluru",
+        "linkedin_url": null,
+        "skills": [
+          "Python",
+          "Kubernetes",
+          "Systems Design"
+        ],
+        "is_approved": true
+      }
+    },
+    {
+      "id": "66b21725-f82b-4b5d-9636-b1f63236d215",
+      "name": "Sneha Iyer",
+      "email": "sneha.iyer@alumni.com",
+      "phone_number": "+918001002002",
+      "role": "alumni",
+      "is_active": true,
+      "profile": {
+        "usn": "1RV15CS002",
+        "company": "Microsoft",
+        "designation": "Principal PM",
+        "graduation_year": 2019,
+        "branch": "Computer Science",
+        "location": "Hyderabad",
+        "linkedin_url": null,
+        "skills": [
+          "Product Management",
+          "Azure",
+          "SQL"
+        ],
+        "is_approved": true
+      }
+    },
+    {
+      "id": "b7ea3e4b-83d0-4a7a-b11d-f817ab974a52",
+      "name": "Vikram Malhotra",
+      "email": "vikram.m@alumni.com",
+      "phone_number": "+918001002003",
+      "role": "alumni",
+      "is_active": true,
+      "profile": {
+        "usn": "1RV16IS001",
+        "company": "Amazon",
+        "designation": "SDE-II",
+        "graduation_year": 2020,
+        "branch": "Information Science",
+        "location": "Seattle",
+        "linkedin_url": null,
+        "skills": [
+          "Java",
+          "AWS",
+          "DynamoDB"
+        ],
+        "is_approved": true
+      }
+    },
+    {
+      "id": "9fe7d5d6-3cc2-451e-a49c-0d3ccaa49f13",
+      "name": "Priya Sharma",
+      "email": "priya.sharma@alumni.com",
+      "phone_number": "+918001002004",
+      "role": "alumni",
+      "is_active": true,
+      "profile": {
+        "usn": "1RV16EC001",
+        "company": "Intel",
+        "designation": "Hardware Engineer",
+        "graduation_year": 2020,
+        "branch": "Electronics",
+        "location": "Bengaluru",
+        "linkedin_url": null,
+        "skills": [
+          "VLSI",
+          "Verilog",
+          "Embedded Systems"
+        ],
+        "is_approved": true
+      }
+    },
+    {
+      "id": "448b3b8a-0e87-4c2f-97a5-bc40814df7aa",
+      "name": "Aniket Deshmukh",
+      "email": "aniket.d@alumni.com",
+      "phone_number": "+918001002005",
+      "role": "alumni",
+      "is_active": true,
+      "profile": {
+        "usn": "1RV17CS001",
+        "company": "Razorpay",
+        "designation": "Tech Lead",
+        "graduation_year": 2021,
+        "branch": "Computer Science",
+        "location": "Mumbai",
+        "linkedin_url": null,
+        "skills": [
+          "Go",
+          "React",
+          "Payment Gateways"
+        ],
+        "is_approved": true
+      }
+    },
+    {
+      "id": "cd5aa4b1-6c38-4a97-9267-73df62738d97",
+      "name": "Meghana Bhat",
+      "email": "meghana.b@alumni.com",
+      "phone_number": "+918001002006",
+      "role": "alumni",
+      "is_active": true,
+      "profile": {
+        "usn": "1RV17IS001",
+        "company": "Atlassian",
+        "designation": "Frontend Lead",
+        "graduation_year": 2021,
+        "branch": "Information Science",
+        "location": "Bengaluru",
+        "linkedin_url": null,
+        "skills": [
+          "JavaScript",
+          "React",
+          "TypeScript"
+        ],
+        "is_approved": true
+      }
+    },
+    {
+      "id": "6b1aa22e-d0e0-41a6-bf1c-bf13758590bb",
+      "name": "Rohan Fernandes",
+      "email": "rohan.f@alumni.com",
+      "phone_number": "+918001002007",
+      "role": "alumni",
+      "is_active": true,
+      "profile": {
+        "usn": "1RV18EC001",
+        "company": "Qualcomm",
+        "designation": "Embedded Engineer",
+        "graduation_year": 2022,
+        "branch": "Electronics",
+        "location": "San Diego",
+        "linkedin_url": null,
+        "skills": [
+          "C++",
+          "RTOS",
+          "Firmware"
+        ],
+        "is_approved": true
+      }
+    },
+    {
+      "id": "676d163a-8d47-4840-b1b6-3fa41b4e28c1",
+      "name": "Shalini Hegde",
+      "email": "shalini.h@alumni.com",
+      "phone_number": "+918001002008",
+      "role": "alumni",
+      "is_active": true,
+      "profile": {
+        "usn": "1RV18ME001",
+        "company": "Tesla",
+        "designation": "Thermal Engineer",
+        "graduation_year": 2022,
+        "branch": "Mechanical",
+        "location": "California",
+        "linkedin_url": null,
+        "skills": [
+          "CAD",
+          "FEA",
+          "Thermodynamics"
+        ],
+        "is_approved": true
+      }
+    },
+    {
+      "id": "39974643-ba72-443e-9730-a400ff6fa3af",
+      "name": "Tanmay Shah",
+      "email": "tanmay.shah@alumni.com",
+      "phone_number": "+918001002009",
+      "role": "alumni",
+      "is_active": true,
+      "profile": {
+        "usn": "1RV19CV001",
+        "company": "L&T",
+        "designation": "Project Manager",
+        "graduation_year": 2023,
+        "branch": "Civil Engineering",
+        "location": "Delhi",
+        "linkedin_url": null,
+        "skills": [
+          "Construction Management",
+          "AutoCAD"
+        ],
+        "is_approved": true
+      }
+    },
+    {
+      "id": "128dfe5b-8aa4-486e-aa90-46f1a8ada210",
+      "name": "Zoya Ansari",
+      "email": "zoya.ansari@alumni.com",
+      "phone_number": "+918001002010",
+      "role": "alumni",
+      "is_active": true,
+      "profile": {
+        "usn": "1RV19CS001",
+        "company": "Google",
+        "designation": "BE",
+        "graduation_year": 2023,
+        "branch": "CSE",
+        "location": "Bangalore",
+        "linkedin_url": "xyz_linked_in",
+        "skills": [
+          "Backend Developer"
+        ],
+        "is_approved": true
+      }
+    },
+    {
+      "id": "6d5c26d5-92c0-431d-9b75-20e28f0926c6",
+      "name": "Dr. Ramesh Kumar",
+      "email": "ramesh.kumar@college.com",
+      "phone_number": "+917001002001",
+      "role": "faculty",
+      "is_active": true,
+      "profile": {
+        "employee_id": "FAC001",
+        "department": "Computer Science",
+        "designation": "Professor & HOD",
+        "is_approved": true
+      }
+    },
+    {
+      "id": "f8cb80d8-a9b4-41e4-acf9-bb18594909b1",
+      "name": "Prof. Sunitha Rao",
+      "email": "sunitha.rao@college.com",
+      "phone_number": "+917001002002",
+      "role": "faculty",
+      "is_active": true,
+      "profile": {
+        "employee_id": "FAC002",
+        "department": "Computer Science",
+        "designation": "Assistant Professor",
+        "is_approved": true
+      }
+    },
+    {
+      "id": "e268614e-8a7d-48ca-8aef-61e81b462322",
+      "name": "Dr. Vivek Shenoy",
+      "email": "vivek.shenoy@college.com",
+      "phone_number": "+917001002003",
+      "role": "faculty",
+      "is_active": true,
+      "profile": {
+        "employee_id": "FAC003",
+        "department": "Information Science",
+        "designation": "Professor",
+        "is_approved": true
+      }
+    },
+    {
+      "id": "8d5a6b8f-c596-47da-94bb-fe45bef3fa1f",
+      "name": "Prof. Aruna Devi",
+      "email": "aruna.devi@college.com",
+      "phone_number": "+917001002004",
+      "role": "faculty",
+      "is_active": true,
+      "profile": {
+        "employee_id": "FAC004",
+        "department": "Electronics",
+        "designation": "Associate Professor",
+        "is_approved": true
+      }
+    },
+    {
+      "id": "2fb56140-46da-44bb-9622-5b47c91b896f",
+      "name": "Dr. Madhavan Pillai",
+      "email": "madhavan.p@college.com",
+      "phone_number": "+917001002005",
+      "role": "faculty",
+      "is_active": true,
+      "profile": {
+        "employee_id": "FAC005",
+        "department": "Mechanical",
+        "designation": "Professor",
+        "is_approved": true
+      }
+    }
+  ],
+  "college_registry_records": [
+    {
+      "usn": "1RV20CS001",
+      "full_name": "Munir Student",
+      "email": "student@college.com",
+      "phone_number": "+919876543210",
+      "role": "student",
+      "branch": "Computer Science",
+      "graduation_year": 2026
+    },
+    {
+      "usn": "1RV20CS002",
+      "full_name": "Alumni User",
+      "email": "alumni@college.com",
+      "phone_number": "+918765432109",
+      "role": "alumni",
+      "branch": "Computer Science",
+      "graduation_year": 2020
+    },
+    {
+      "usn": "1RV21CS001",
+      "full_name": "Aditya Sharma",
+      "email": "aditya.sharma@college.com",
+      "phone_number": "+919001002001",
+      "role": "student",
+      "branch": "Computer Science",
+      "graduation_year": 2025
+    },
+    {
+      "usn": "1RV21CS002",
+      "full_name": "Bhavya Reddy",
+      "email": "bhavya.reddy@college.com",
+      "phone_number": "+919001002002",
+      "role": "student",
+      "branch": "Computer Science",
+      "graduation_year": 2025
+    },
+    {
+      "usn": "1RV21CS003",
+      "full_name": "Chaitanya Kumar",
+      "email": "chaitanya.k@college.com",
+      "phone_number": "+919001002003",
+      "role": "student",
+      "branch": "Information Science",
+      "graduation_year": 2025
+    },
+    {
+      "usn": "1RV21IS001",
+      "full_name": "Divya Nair",
+      "email": "divya.nair@college.com",
+      "phone_number": "+919001002004",
+      "role": "student",
+      "branch": "Information Science",
+      "graduation_year": 2025
+    },
+    {
+      "usn": "1RV21EC001",
+      "full_name": "Eshwar Prasad",
+      "email": "eshwar.p@college.com",
+      "phone_number": "+919001002005",
+      "role": "student",
+      "branch": "Electronics",
+      "graduation_year": 2025
+    },
+    {
+      "usn": "1RV21EC002",
+      "full_name": "Farhan Khan",
+      "email": "farhan.khan@college.com",
+      "phone_number": "+919001002006",
+      "role": "student",
+      "branch": "Electronics",
+      "graduation_year": 2025
+    },
+    {
+      "usn": "1RV21ME001",
+      "full_name": "Gauri Deshmukh",
+      "email": "gauri.d@college.com",
+      "phone_number": "+919001002007",
+      "role": "student",
+      "branch": "Mechanical",
+      "graduation_year": 2026
+    },
+    {
+      "usn": "1RV21ME002",
+      "full_name": "Harish Iyer",
+      "email": "harish.iyer@college.com",
+      "phone_number": "+919001002008",
+      "role": "student",
+      "branch": "Mechanical",
+      "graduation_year": 2026
+    },
+    {
+      "usn": "1RV21CV001",
+      "full_name": "Indu Gopal",
+      "email": "indu.gopal@college.com",
+      "phone_number": "+919001002009",
+      "role": "student",
+      "branch": "Civil Engineering",
+      "graduation_year": 2026
+    },
+    {
+      "usn": "1RV21CV002",
+      "full_name": "Jayant Patel",
+      "email": "jayant.patel@college.com",
+      "phone_number": "+919001002010",
+      "role": "student",
+      "branch": "Civil Engineering",
+      "graduation_year": 2026
+    },
+    {
+      "usn": "1RV22CS001",
+      "full_name": "Kavya Murthy",
+      "email": "kavya.murthy@college.com",
+      "phone_number": "+919001002011",
+      "role": "student",
+      "branch": "Computer Science",
+      "graduation_year": 2026
+    },
+    {
+      "usn": "1RV22CS002",
+      "full_name": "Lokesh Gowda",
+      "email": "lokesh.gowda@college.com",
+      "phone_number": "+919001002012",
+      "role": "student",
+      "branch": "Computer Science",
+      "graduation_year": 2026
+    },
+    {
+      "usn": "1RV22IS001",
+      "full_name": "Meera Sen",
+      "email": "meera.sen@college.com",
+      "phone_number": "+919001002013",
+      "role": "student",
+      "branch": "Information Science",
+      "graduation_year": 2026
+    },
+    {
+      "usn": "1RV22EC001",
+      "full_name": "Nikhil Verma",
+      "email": "nikhil.verma@college.com",
+      "phone_number": "+919001002014",
+      "role": "student",
+      "branch": "Electronics",
+      "graduation_year": 2026
+    },
+    {
+      "usn": "1RV22ME001",
+      "full_name": "Ojas Gupta",
+      "email": "ojas.gupta@college.com",
+      "phone_number": "+919001002015",
+      "role": "student",
+      "branch": "Mechanical",
+      "graduation_year": 2026
+    },
+    {
+      "usn": "1RV15CS001",
+      "full_name": "Rahul Dravid",
+      "email": "rahul.d@alumni.com",
+      "phone_number": "+918001002001",
+      "role": "alumni",
+      "branch": "Computer Science",
+      "graduation_year": 2019
+    },
+    {
+      "usn": "1RV15CS002",
+      "full_name": "Sneha Iyer",
+      "email": "sneha.iyer@alumni.com",
+      "phone_number": "+918001002002",
+      "role": "alumni",
+      "branch": "Computer Science",
+      "graduation_year": 2019
+    },
+    {
+      "usn": "1RV16IS001",
+      "full_name": "Vikram Malhotra",
+      "email": "vikram.m@alumni.com",
+      "phone_number": "+918001002003",
+      "role": "alumni",
+      "branch": "Information Science",
+      "graduation_year": 2020
+    },
+    {
+      "usn": "1RV16EC001",
+      "full_name": "Priya Sharma",
+      "email": "priya.sharma@alumni.com",
+      "phone_number": "+918001002004",
+      "role": "alumni",
+      "branch": "Electronics",
+      "graduation_year": 2020
+    },
+    {
+      "usn": "1RV17CS001",
+      "full_name": "Aniket Deshmukh",
+      "email": "aniket.d@alumni.com",
+      "phone_number": "+918001002005",
+      "role": "alumni",
+      "branch": "Computer Science",
+      "graduation_year": 2021
+    },
+    {
+      "usn": "1RV17IS001",
+      "full_name": "Meghana Bhat",
+      "email": "meghana.b@alumni.com",
+      "phone_number": "+918001002006",
+      "role": "alumni",
+      "branch": "Information Science",
+      "graduation_year": 2021
+    },
+    {
+      "usn": "1RV18EC001",
+      "full_name": "Rohan Fernandes",
+      "email": "rohan.f@alumni.com",
+      "phone_number": "+918001002007",
+      "role": "alumni",
+      "branch": "Electronics",
+      "graduation_year": 2022
+    },
+    {
+      "usn": "1RV18ME001",
+      "full_name": "Shalini Hegde",
+      "email": "shalini.h@alumni.com",
+      "phone_number": "+918001002008",
+      "role": "alumni",
+      "branch": "Mechanical",
+      "graduation_year": 2022
+    },
+    {
+      "usn": "1RV19CV001",
+      "full_name": "Tanmay Shah",
+      "email": "tanmay.shah@alumni.com",
+      "phone_number": "+918001002009",
+      "role": "alumni",
+      "branch": "Civil Engineering",
+      "graduation_year": 2023
+    },
+    {
+      "usn": "1RV19CS001",
+      "full_name": "Zoya Ansari",
+      "email": "zoya.ansari@alumni.com",
+      "phone_number": "+918001002010",
+      "role": "alumni",
+      "branch": "Computer Science",
+      "graduation_year": 2023
+    },
+    {
+      "usn": "1RV23CS099",
+      "full_name": "Hari Test Student",
+      "email": "hari@test.com",
+      "phone_number": "+919876500000",
+      "role": "student",
+      "branch": "Computer Science",
+      "graduation_year": 2027
+    }
+  ]
+}

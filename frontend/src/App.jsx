@@ -741,7 +741,49 @@ function Chat({ user, request, initialActiveId, clearInitialActiveId }) {
   return <div className="page-content chat-page"><PageHeader eyebrow="Stay close" title="Messages" text="Private conversations with the people in your community." /><div className="chat-shell"><aside className="conversation-panel"><div className="conversation-search"><Search size={15} /><input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Find someone to message" /></div>{users.length > 0 && <div className="search-results">{users.map((person) => <button key={person.id} onClick={() => startChat(person)}><span className="avatar-circle">{initials(person.full_name)}</span><span><strong>{person.full_name}</strong><small>{person.designation || person.role}</small></span><Plus size={14} /></button>)}</div>}<div className="conversation-label">YOUR CONVERSATIONS</div>{conversations.length ? conversations.map((conversation) => <button key={conversation.id} className={`conversation-item ${active?.id === conversation.id ? 'active' : ''}`} onClick={() => openConversation(conversation)}><span className="avatar-circle">{initials(conversation.partner?.full_name)}</span><span><strong>{conversation.partner?.full_name}</strong><small>{conversation.last_message?.content || 'Start a conversation'}</small></span>{conversation.unread_count > 0 && <b>{conversation.unread_count}</b>}</button>) : <div className="conversation-empty"><MessageCircle size={19} /><p>Your conversations will appear here.</p></div>}</aside><section className="chat-window">{active ? <><div className="chat-header"><span className="avatar-circle">{initials(active.partner?.full_name)}</span><div><strong>{active.partner?.full_name}</strong><small>{connected ? 'Online conversation' : 'Reconnecting securely…'}</small></div><span className={`connection-dot ${connected ? 'connected' : ''}`} /></div><div className="messages-list">{messages.length ? messages.map((message) => <div className={`message-row ${String(message.sender_id) === String(user.id) ? 'mine' : ''}`} key={message.id}><div className="message-bubble"><p>{message.content}</p><small>{formatDate(message.created_at, true)} {String(message.sender_id) === String(user.id) && (message.is_read ? ' · Read' : ' · Sent')}</small></div></div>) : <div className="chat-empty"><span className="chat-empty-icon"><MessageCircle size={24} /></span><h3>Start the conversation</h3><p>Say hello and make the first connection.</p></div>}</div><form className="message-composer" onSubmit={send}><input value={text} onChange={(e) => setText(e.target.value)} placeholder="Write a thoughtful message…" maxLength={2000} /><button type="submit" aria-label="Send message"><Send size={17} /></button></form></> : <div className="chat-empty"><span className="chat-empty-icon"><MessageCircle size={26} /></span><h3>Select a conversation</h3><p>Choose a person from the left or search the community to start something meaningful.</p></div>}</section></div></div>;
 }
 
-function Admin({ request }) { const [facultyId, setFacultyId] = useState(''); const [alumniId, setAlumniId] = useState(''); const [message, setMessage] = useState(''); const [error, setError] = useState(''); const approve = async (type) => { try { const id = type === 'faculty' ? facultyId : alumniId; await request(type === 'faculty' ? `/api/v1/auth/faculty/${id}/approve` : `/api/v1/alumni/${id}/approve`, { method: 'PATCH' }); setMessage(`${type[0].toUpperCase() + type.slice(1)} profile approved.`); } catch (err) { setError(err.message); } }; return <div className="page-content"><PageHeader eyebrow="Keep the network trusted" title="Admin review" text="Approve verified profiles as they are ready to join the active community." />{message && <Notice type="success">{message}</Notice>}{error && <Notice>{error}</Notice>}<div className="review-grid"><div className="panel review-card"><span className="review-icon"><GraduationCap size={19} /></span><h3>Faculty approval</h3><p>Enter the faculty profile ID from the review queue to activate the account.</p><Field label="Faculty ID" value={facultyId} onChange={(e) => setFacultyId(e.target.value)} placeholder="UUID" /><Button onClick={() => approve('faculty')}>Approve faculty <Check size={15} /></Button></div><div className="panel review-card"><span className="review-icon"><Users size={19} /></span><h3>Alumni approval</h3><p>Approve an alumni profile that has completed its moderation review.</p><Field label="Alumni ID" value={alumniId} onChange={(e) => setAlumniId(e.target.value)} placeholder="UUID" /><Button onClick={() => approve('alumni')}>Approve alumni <Check size={15} /></Button></div></div></div>; }
+function Admin({ request }) { 
+  const [pendingFaculty, setPendingFaculty] = useState([]);
+  const [pendingAlumni, setPendingAlumni] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [message, setMessage] = useState('');
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    const fetchPending = async () => {
+      try {
+        setLoading(true);
+        const [facData, alumData] = await Promise.all([
+          request('/api/v1/admin/pending-faculty'),
+          request('/api/v1/admin/pending-alumni')
+        ]);
+        setPendingFaculty(facData || []);
+        setPendingAlumni(alumData || []);
+      } catch (err) {
+        setError('Failed to fetch pending approvals');
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchPending();
+  }, [request]);
+
+  const approve = async (type, id) => {
+    try {
+      await request(type === 'faculty' ? `/api/v1/auth/faculty/${id}/approve` : `/api/v1/alumni/${id}/approve`, { method: 'PATCH' });
+      setMessage(`${type[0].toUpperCase() + type.slice(1)} profile approved.`);
+      if (type === 'faculty') {
+        setPendingFaculty(prev => prev.filter(f => f.faculty.id !== id));
+      } else {
+        setPendingAlumni(prev => prev.filter(a => a.alumni.id !== id));
+      }
+      setTimeout(() => setMessage(''), 3000);
+    } catch (err) {
+      setError(err.message);
+    }
+  }; 
+
+  return <div className="page-content"><PageHeader eyebrow="Keep the network trusted" title="Admin review" text="Approve verified profiles as they are ready to join the active community." />{message && <Notice type="success">{message}</Notice>}{error && <Notice onClose={() => setError('')}>{error}</Notice>}<div className="review-grid"><div className="panel review-card"><div className="panel-header"><span className="review-icon"><GraduationCap size={19} /></span><h3>Faculty pending approval ({pendingFaculty.length})</h3></div>{loading ? <p className="empty-state">Loading...</p> : pendingFaculty.length === 0 ? <p className="empty-state">No faculty pending approval.</p> : <div className="pending-list">{pendingFaculty.map(fac => <div key={fac.faculty.id} className="pending-item"><div><strong>{fac.user.full_name}</strong><small>{fac.user.email} • {fac.faculty.department} • {fac.faculty.designation}</small></div><Button size="small" onClick={() => approve('faculty', fac.faculty.id)}>Approve <Check size={14} /></Button></div>)}</div>}</div><div className="panel review-card"><div className="panel-header"><span className="review-icon"><Users size={19} /></span><h3>Alumni pending approval ({pendingAlumni.length})</h3></div>{loading ? <p className="empty-state">Loading...</p> : pendingAlumni.length === 0 ? <p className="empty-state">No alumni pending approval.</p> : <div className="pending-list">{pendingAlumni.map(alum => <div key={alum.alumni.id} className="pending-item"><div><strong>{alum.user.full_name}</strong><small>{alum.user.email} • {alum.alumni.branch} • {alum.alumni.graduation_year}</small></div><Button size="small" onClick={() => approve('alumni', alum.alumni.id)}>Approve <Check size={14} /></Button></div>)}</div>}</div></div></div>; 
+}
 function Profile({ user, onLogout, request, onUserUpdate }) {
   const [editing, setEditing] = useState(false);
   const [profile, setProfile] = useState({

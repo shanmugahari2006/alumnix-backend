@@ -6,9 +6,14 @@ from app.database import get_db
 from app.models.user import User, UserRole
 from app.dependencies import require_role
 from app.schemas.admin import AdminStatsResponse, AdminUsersPaginatedResponse, UserStatusUpdate
-from app.schemas.auth import UserResponse
+from app.schemas.auth import UserResponse, AlumniUserResponse
+from app.schemas.faculty import FacultyResponse
 from app.services.admin_service import AdminService
-
+from sqlalchemy.orm import selectinload
+from sqlalchemy import select
+from app.models.faculty import Faculty
+from app.models.alumni import Alumni
+from typing import List
 # Restrict all routes in this router to admin role.
 router = APIRouter(dependencies=[Depends(require_role(["admin"]))])
 
@@ -62,3 +67,29 @@ async def update_user_status(
         is_active=payload.is_active
     )
     return UserResponse.model_validate(user)
+
+@router.get("/pending-faculty", response_model=List[FacultyResponse])
+async def list_pending_faculty(db: AsyncSession = Depends(get_db)):
+    """
+    Returns a list of faculty registrations pending admin approval.
+    """
+    res = await db.execute(
+        select(Faculty)
+        .where(Faculty.is_approved == False)
+        .options(selectinload(Faculty.user))
+    )
+    faculty_list = res.scalars().all()
+    return [FacultyResponse.model_validate(f) for f in faculty_list]
+
+@router.get("/pending-alumni", response_model=List[AlumniUserResponse])
+async def list_pending_alumni(db: AsyncSession = Depends(get_db)):
+    """
+    Returns a list of alumni registrations pending admin approval.
+    """
+    res = await db.execute(
+        select(Alumni)
+        .where(Alumni.is_approved == False)
+        .options(selectinload(Alumni.user))
+    )
+    alumni_list = res.scalars().all()
+    return [AlumniUserResponse(user=UserResponse.model_validate(a.user), alumni=a) for a in alumni_list]
