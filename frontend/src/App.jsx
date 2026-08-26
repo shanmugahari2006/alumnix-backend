@@ -13,8 +13,8 @@ import './App.css';
 
 const API_BASE = (import.meta.env.VITE_API_BASE_URL || (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' ? 'http://127.0.0.1:8000' : window.location.origin)).replace(/\/$/, '');
 const WS_BASE = (import.meta.env.VITE_WS_BASE_URL || (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' ? 'ws://127.0.0.1:8000' : `${window.location.protocol === 'https:' ? 'wss' : 'ws'}://${window.location.host}`)).replace(/\/$/, '');
-const ACCESS_KEY = 'aluminix_access_token';
-const REFRESH_KEY = 'aluminix_refresh_token';
+const ACCESS_KEY = 'alumnix_access_token';
+const REFRESH_KEY = 'alumnix_refresh_token';
 
 const navItems = [
   { id: 'home', label: 'Home', icon: Home },

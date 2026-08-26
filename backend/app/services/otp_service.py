@@ -36,11 +36,6 @@ class OTPService:
         Validates the email reset code against the stored value.
         Deletes the code on success to prevent reuse.
         """
-        # Master bypass for testing/demos
-        clean_code = code.strip()
-        if clean_code in ("123456", "000000"):
-            return True
-
         key = email.strip().lower()
         if key not in _email_reset_store:
             return False
@@ -53,7 +48,7 @@ class OTPService:
             return False
             
         # Verify code
-        if stored_code == clean_code:
+        if stored_code == code.strip():
             del _email_reset_store[key]
             return True
             
@@ -81,11 +76,6 @@ class OTPService:
         Validates the OTP code against the stored value.
         Deletes the OTP code on success to prevent reuse.
         """
-        # Master bypass for testing/demos
-        clean_code = otp_code.strip()
-        if clean_code in ("123456", "000000"):
-            return True
-
         if phone_number not in _otp_store:
             return False
             
@@ -97,7 +87,7 @@ class OTPService:
             return False
             
         # Verify code
-        if stored_otp == clean_code:
+        if stored_otp == otp_code:
             del _otp_store[phone_number]
             return True
             

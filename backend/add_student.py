@@ -58,7 +58,7 @@ async def list_records():
 
 
 async def main():
-    print("\n=== Aluminix College Registry Manager ===\n")
+    print("\n=== Alumnix College Registry Manager ===\n")
     print("1. Add a new student")
     print("2. Add a new alumni")
     print("3. View all registry records")

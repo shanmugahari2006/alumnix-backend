@@ -35,7 +35,7 @@ class CallKitService {
     CallKitParams params = CallKitParams(
       id: uuid,
       nameCaller: callerName,
-      appName: 'Aluminix',
+      appName: 'Alumnix',
       avatar: avatarUrl ?? '',
       handle: 'Mentorship Video Call',
       type: 1, // 0: Audio, 1: Video

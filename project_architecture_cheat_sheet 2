@@ -1,0 +1,94 @@
+# Smart India Hackathon: AlumniConnect Full-Stack Cheat Sheet
+
+This guide is designed to help you understand every component of your full-stack application (frontend and backend) so you can confidently answer any technical questions from the hackathon judges.
+
+---
+
+## 🛠️ The Tech Stack (What we used)
+
+### Frontend (Client-Side)
+| Technology | What it is | Why we chose it (The "Pitch") |
+| :--- | :--- | :--- |
+| **React 18** | UI Library | Component-based architecture allows for highly reusable, maintainable UI code and a lightning-fast virtual DOM. |
+| **Vite** | Build Tool & Bundler | Outperforms older bundlers like Create-React-App/Webpack. It provides near-instant server start and extremely fast hot-module replacement (HMR). |
+| **React Router v6** | Client-Side Routing | Enables single-page application (SPA) navigation without reloading the browser page, providing a native app-like experience. |
+| **Axios** | HTTP Client | Simplifies making API requests to our backend with built-in JSON parsing, request interception, and robust error handling. |
+| **Vanilla CSS** | Styling | We wrote custom CSS from scratch to maintain maximum control over the highly customized, responsive, and aesthetic design without the overhead of heavy UI frameworks. |
+| **Jitsi React SDK** | Video Conferencing | Enables seamless, secure, open-source video calling directly in the browser for alumni-student mentorship sessions. |
+
+### Backend (Server-Side)
+| Technology | What it is | Why we chose it (The "Pitch") |
+| :--- | :--- | :--- |
+| **Python 3** | Programming Language | Offers clean syntax, massive community support, and rapid development speeds. |
+| **FastAPI** | Web Framework | High-performance API framework that uses asynchronous (`async/await`) code out of the box. It automatically generates interactive **Swagger UI** documentation. |
+| **Uvicorn** | ASGI Web Server | The lightning-fast engine that runs our FastAPI application in production. |
+| **SQLAlchemy (Async)** | ORM (Object-Relational Mapper) | Allows us to write database queries using Python code instead of raw SQL, with full asynchronous support to prevent the database from blocking the server. |
+| **PostgreSQL (Supabase)** | Relational Database | The most secure, enterprise-grade open-source SQL database. Hosted on **Supabase** for zero-maintenance cloud database hosting. |
+
+### DevOps & Infrastructure
+| Technology | What it is | Why we chose it |
+| :--- | :--- | :--- |
+| **Railway** | Cloud Hosting (PaaS) | Automatically pulls our latest code from GitHub, builds it, and deploys it to the cloud in seconds. |
+| **Docker** | Containerization | Packages our backend code and dependencies into a single container so it runs identically on local laptops and the cloud. |
+
+---
+
+## 📐 Project Architecture (How it is built)
+
+We implemented a **Modern SPA + RESTful API Architecture**:
+
+```mermaid
+graph TD
+    Browser[React Single Page Application] -->|HTTP / JSON requests| Router[FastAPI Routers]
+    Router -->|Validates Input| Service[Services / Business Logic]
+    Service -->|Uses ORM| Model[Models / Database Schemas]
+    Model -->|Async Query| DB[(Supabase PostgreSQL Database)]
+    
+    %% External integrations
+    Service -.->|API Call| Razorpay[Razorpay Gateway]
+    Browser -.->|Video Stream| Jitsi[Jitsi Meet Servers]
+```
+
+### The Three Backend Layers:
+1. **Routers (`app/routes/`):** The "Traffic Cops". They listen to incoming HTTP requests (like `POST /login`), validate that the request has the correct format using Pydantic, and hand it over to the Services.
+2. **Services (`app/services/`):** The "Brain". This is where the core logic lives. For example, validating OTPs, calculating Razorpay hashes, or aggregating analytics for the admin dashboard.
+3. **Models (`app/models/`):** The "Blueprints". These python classes define how tables look in PostgreSQL (e.g., what columns the `Donation` table has) and how they relate to each other.
+
+---
+
+## 🚀 Core Features & Third-Party Integrations
+
+### 1. Security & Authentication (JWT)
+* **How it works:** When a user logs in, the backend issues an **Access Token** encoded as a **JWT (JSON Web Token)** signed with a secure server key. 
+* **Role-Based Access Control (RBAC):** We inspect the JWT token on every protected route to restrict actions:
+  * Only **Alumni** can post jobs.
+  * Only **Students** can apply for jobs.
+  * Only **Admins** can approve pending profiles in the Admin Review dashboard.
+
+### 2. Payment Gateway (Razorpay)
+* **The Pipeline:** 
+  1. Frontend asks backend to create a transaction → Backend requests `order_id` from Razorpay.
+  2. Frontend opens popup → User pays → Razorpay generates a secure transaction receipt and cryptographic signature.
+  3. Backend receives the transaction ID and signature → Backend performs an **HMAC-SHA256 signature verification** using the secret API key to verify the transaction is real and not forged.
+
+### 3. File Uploads (Supabase Storage)
+* We integrated the **Supabase SDK** to handle media storage. When a user uploads a profile picture or a resume, the backend streams the file directly into a Supabase Storage Bucket and returns a public URL to save in the database.
+
+---
+
+## 💡 Top Hackathon Questions (And how to answer them)
+
+### Q1: "Why did you use FastAPI instead of Django or Node.js?"
+> **Answer:** *"FastAPI is built natively on top of Python's ASGI standard, meaning it uses asynchronous code (`async/await`) out of the box. This allows it to handle thousands of concurrent requests with extremely low latency, similar to Node.js, while retaining Python's AI-friendly ecosystem. Plus, it auto-generates our API documentation (Swagger UI), saving development time."*
+
+### Q2: "Why React + Vite instead of Next.js?"
+> **Answer:** *"Our platform functions primarily as an authenticated dashboard behind a login wall, rather than a public content site requiring SEO. React with Vite provides an incredibly fast Single Page Application (SPA) experience with client-side routing, which is perfect for complex dashboards without the added server-side rendering complexity of Next.js."*
+
+### Q3: "How are you securing user passwords in the database?"
+> **Answer:** *"We never store plain text passwords. We hash them using the industry-standard **bcrypt** hashing algorithm with random salts. Even if a hacker dumps the entire database, they cannot reverse-engineer the passwords."*
+
+### Q4: "How does your backend prevent fake payment confirmations?"
+> **Answer:** *"We implement Razorpay's **Webhook / Signature Verification** pipeline. When a user pays, Razorpay generates a cryptographic signature. Our backend takes the order details and re-calculates the signature using our private `RAZORPAY_KEY_SECRET` in a secure backend environment. If a user tries to mock a successful payment from the browser, the signatures will mismatch and our backend will reject the request."*
+
+### Q5: "Is your app deployable to local or on-premise servers?"
+> **Answer:** *"Yes! The backend is fully **Dockerized** and the frontend compiles to static HTML/JS/CSS files. The entire stack can be run on our cloud server (Railway), local developer machines, or on-premise college servers effortlessly."*
