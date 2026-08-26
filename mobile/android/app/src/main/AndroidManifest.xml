@@ -17,7 +17,7 @@
     <uses-feature android:name="android.hardware.camera.autofocus" />
 
     <application
-        android:label="Alumnix Mobile"
+        android:label="Alumnix"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity
