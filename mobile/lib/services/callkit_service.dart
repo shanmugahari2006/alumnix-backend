@@ -71,29 +71,20 @@ class CallKitService {
     FlutterCallkitIncoming.onEvent.listen((CallEvent? event) async {
       if (event == null) return;
 
-      switch (event.event) {
-        case Event.ACTION_CALL_ACCEPT:
-          final extra = Map<String, dynamic>.from(event.body['extra'] ?? {});
-          if (onCallAccepted != null) {
-            onCallAccepted!(extra);
-          }
-          break;
-
-        case Event.ACTION_CALL_DECLINE:
-          final extra = Map<String, dynamic>.from(event.body['extra'] ?? {});
-          await _declineCallBackend(extra);
-          if (onCallDeclined != null) {
-            onCallDeclined!(extra);
-          }
-          break;
-
-        case Event.ACTION_CALL_TIMEOUT:
-          final extra = Map<String, dynamic>.from(event.body['extra'] ?? {});
-          await _declineCallBackend(extra);
-          break;
-
-        default:
-          break;
+      if (event is CallEventActionCallAccept) {
+        final extra = Map<String, dynamic>.from(event.callKitParams.extra ?? {});
+        if (onCallAccepted != null) {
+          onCallAccepted!(extra);
+        }
+      } else if (event is CallEventActionCallDecline) {
+        final extra = Map<String, dynamic>.from(event.callKitParams.extra ?? {});
+        await _declineCallBackend(extra);
+        if (onCallDeclined != null) {
+          onCallDeclined!(extra);
+        }
+      } else if (event is CallEventActionCallTimeout) {
+        final extra = <String, dynamic>{'call_id': event.id};
+        await _declineCallBackend(extra);
       }
     });
   }
