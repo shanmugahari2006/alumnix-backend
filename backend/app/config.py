@@ -35,9 +35,9 @@ class Settings(BaseSettings):
             # URL-encode the password
             encoded_password = urllib.parse.quote_plus(raw_password)
             
-            # Change username and host to use the IPv4 connection pooler in Tokyo (ap-northeast-1)
+            # Change username and host to use the IPv4 connection pooler in Mumbai (ap-south-1)
             pooler_username = f"{username}.{project_ref}"
-            pooler_host = f"aws-0-ap-northeast-1.pooler.supabase.com"
+            pooler_host = f"aws-0-ap-south-1.pooler.supabase.com"
             
             new_url = f"postgresql+asyncpg://{pooler_username}:{encoded_password}@{pooler_host}:5432/{dbname}"
             return new_url
