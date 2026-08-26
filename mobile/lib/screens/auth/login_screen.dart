@@ -237,6 +237,26 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                               ],
                             ),
                           ],
+                          AppSpacing.gapV12,
+                          Align(
+                            alignment: Alignment.centerRight,
+                            child: TextButton(
+                              onPressed: () => context.push('/forgot-password'),
+                              style: TextButton.styleFrom(
+                                padding: EdgeInsets.zero,
+                                minimumSize: Size.zero,
+                                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                              ),
+                              child: Text(
+                                'Forgot password?',
+                                style: GoogleFonts.ibmPlexSans(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w600,
+                                  color: AppColors.primary,
+                                ),
+                              ),
+                            ),
+                          ),
                           AppSpacing.gapV24,
 
                           PrimaryButton(

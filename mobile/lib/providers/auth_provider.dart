@@ -435,3 +435,110 @@ class RegistrationWizardNotifier extends StateNotifier<RegistrationWizardState> 
     state = const RegistrationWizardState();
   }
 }
+
+/// ---------------------------------------------------------------------------
+/// Password Recovery State & Notifier
+/// ---------------------------------------------------------------------------
+
+@immutable
+class ForgotPasswordState {
+  final String identifier;
+  final int step; // 0: Enter Identifier, 1: Enter Code & Password, 2: Done
+  final bool isLoading;
+  final String? errorMessage;
+  final String? successMessage;
+
+  const ForgotPasswordState({
+    this.identifier = '',
+    this.step = 0,
+    this.isLoading = false,
+    this.errorMessage,
+    this.successMessage,
+  });
+
+  ForgotPasswordState copyWith({
+    String? identifier,
+    int? step,
+    bool? isLoading,
+    String? errorMessage,
+    String? successMessage,
+  }) {
+    return ForgotPasswordState(
+      identifier: identifier ?? this.identifier,
+      step: step ?? this.step,
+      isLoading: isLoading ?? this.isLoading,
+      errorMessage: errorMessage,
+      successMessage: successMessage,
+    );
+  }
+}
+
+final forgotPasswordProvider =
+    StateNotifierProvider.autoDispose<ForgotPasswordNotifier, ForgotPasswordState>((ref) {
+  final authService = ref.watch(authServiceProvider);
+  return ForgotPasswordNotifier(authService);
+});
+
+class ForgotPasswordNotifier extends StateNotifier<ForgotPasswordState> {
+  final AuthService _authService;
+
+  ForgotPasswordNotifier(this._authService) : super(const ForgotPasswordState());
+
+  /// Step 1: Send recovery OTP
+  Future<bool> sendRecoveryCode(String identifier) async {
+    state = state.copyWith(isLoading: true, errorMessage: null, successMessage: null);
+    try {
+      final msg = await _authService.forgotPassword(identifier: identifier);
+      state = state.copyWith(
+        identifier: identifier,
+        isLoading: false,
+        step: 1,
+        successMessage: msg,
+      );
+      return true;
+    } on AuthException catch (e) {
+      state = state.copyWith(isLoading: false, errorMessage: e.message);
+      return false;
+    } catch (_) {
+      state = state.copyWith(
+        isLoading: false,
+        errorMessage: 'Failed to send recovery code. Please try again.',
+      );
+      return false;
+    }
+  }
+
+  /// Step 2: Reset password
+  Future<bool> resetPassword({
+    required String code,
+    required String newPassword,
+  }) async {
+    state = state.copyWith(isLoading: true, errorMessage: null, successMessage: null);
+    try {
+      final msg = await _authService.resetPassword(
+        identifier: state.identifier,
+        code: code,
+        newPassword: newPassword,
+      );
+      state = state.copyWith(
+        isLoading: false,
+        step: 2,
+        successMessage: msg,
+      );
+      return true;
+    } on AuthException catch (e) {
+      state = state.copyWith(isLoading: false, errorMessage: e.message);
+      return false;
+    } catch (_) {
+      state = state.copyWith(
+        isLoading: false,
+        errorMessage: 'Password reset failed. Please try again.',
+      );
+      return false;
+    }
+  }
+
+  void reset() {
+    state = const ForgotPasswordState();
+  }
+}

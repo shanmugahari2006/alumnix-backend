@@ -6,6 +6,7 @@ import '../../providers/auth_provider.dart';
 import '../../theme/colors.dart';
 import '../../theme/spacing.dart';
 import '../../widgets/medallion_badge.dart';
+import '../../providers/chat_provider.dart';
 
 /// App Shell Widget providing persistent Bottom Navigation for 5 tabs
 class HomeShell extends ConsumerWidget {
@@ -27,6 +28,7 @@ class HomeShell extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final authState = ref.watch(authStateProvider);
     final user = authState.user;
+    final unreadCount = ref.watch(unreadCountProvider);
 
     final tabs = [
       _ShellTabItem(
@@ -53,6 +55,12 @@ class HomeShell extends ConsumerWidget {
         label: 'Events',
         icon: Icons.event_outlined,
         selectedIcon: Icons.event_rounded,
+      ),
+      _ShellTabItem(
+        label: 'Messages',
+        icon: Icons.chat_bubble_outline_rounded,
+        selectedIcon: Icons.chat_bubble_rounded,
+        isChat: true,
       ),
     ];
 
@@ -189,10 +197,42 @@ class HomeShell extends ConsumerWidget {
                           ),
                         ),
                         const Spacer(),
-                        Icon(
-                          isSelected ? tab.selectedIcon : tab.icon,
-                          size: 22,
-                          color: isSelected ? AppColors.primary : AppColors.textSecondary,
+                        Stack(
+                          clipBehavior: Clip.none,
+                          children: [
+                            Icon(
+                              isSelected ? tab.selectedIcon : tab.icon,
+                              size: 22,
+                              color: isSelected ? AppColors.primary : AppColors.textSecondary,
+                            ),
+                            if (tab.isChat && unreadCount > 0)
+                              Positioned(
+                                top: -4,
+                                right: -6,
+                                child: Container(
+                                  padding: const EdgeInsets.all(3),
+                                  decoration: const BoxDecoration(
+                                    color: AppColors.error,
+                                    shape: BoxShape.circle,
+                                  ),
+                                  constraints: const BoxConstraints(
+                                    minWidth: 14,
+                                    minHeight: 14,
+                                  ),
+                                  child: Center(
+                                    child: Text(
+                                      '$unreadCount',
+                                      style: const TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 8,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                      textAlign: TextAlign.center,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                          ],
                         ),
                         const SizedBox(height: 3),
                         Text(
@@ -224,10 +264,12 @@ class _ShellTabItem {
   final String label;
   final IconData icon;
   final IconData selectedIcon;
+  final bool isChat;
 
   _ShellTabItem({
     required this.label,
     required this.icon,
     required this.selectedIcon,
+    this.isChat = false,
   });
 }

@@ -5,6 +5,7 @@ import '../providers/auth_provider.dart';
 import '../router/route_guards.dart';
 import '../screens/auth/account_pending_screen.dart';
 import '../screens/auth/faculty_register_screen.dart';
+import '../screens/auth/forgot_password_screen.dart';
 import '../screens/auth/login_screen.dart';
 import '../screens/auth/register_screen.dart';
 import '../screens/directory/alumni_detail_screen.dart';
@@ -23,6 +24,8 @@ import '../screens/profile/admin_approval_screen.dart';
 import '../screens/profile/edit_profile_screen.dart';
 import '../screens/profile/profile_screen.dart';
 import '../screens/shell/home_shell.dart';
+import '../screens/chat/conversations_screen.dart';
+import '../screens/chat/chat_room_screen.dart';
 import '../screens/stories/create_story_screen.dart';
 import '../screens/stories/stories_screen.dart';
 import '../screens/stories/story_detail_screen.dart';
@@ -37,6 +40,8 @@ final _shellNavigatorFundraisers =
     GlobalKey<NavigatorState>(debugLabel: 'fundraisersShell');
 final _shellNavigatorEvents =
     GlobalKey<NavigatorState>(debugLabel: 'eventsShell');
+final _shellNavigatorChat =
+    GlobalKey<NavigatorState>(debugLabel: 'chatShell');
 
 /// GoRouter Provider with Auth State Listener and Role Route Guards
 final appRouterProvider = Provider<GoRouter>((ref) {
@@ -110,6 +115,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/register/faculty',
         builder: (context, state) => const FacultyRegisterScreen(),
+      ),
+      GoRoute(
+        path: '/forgot-password',
+        builder: (context, state) => const ForgotPasswordScreen(),
       ),
       GoRoute(
         path: '/account-pending',
@@ -276,6 +285,27 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                     builder: (context, state) {
                       final id = state.pathParameters['id'] ?? '';
                       return EventDetailScreen(id: id);
+                    },
+                  ),
+                ],
+              ),
+            ],
+          ),
+
+          // Branch 6: Chat/Messages
+          StatefulShellBranch(
+            navigatorKey: _shellNavigatorChat,
+            routes: [
+              GoRoute(
+                path: '/chat',
+                builder: (context, state) => const ConversationsScreen(),
+                routes: [
+                  GoRoute(
+                    path: ':id',
+                    parentNavigatorKey: rootNavigatorKey,
+                    builder: (context, state) {
+                      final id = state.pathParameters['id'] ?? '';
+                      return ChatRoomScreen(conversationId: id);
                     },
                   ),
                 ],

@@ -198,6 +198,56 @@ class AuthService {
     }
   }
 
+  /// Password Recovery Step 1: Request OTP
+  /// POST /api/v1/auth/forgot-password
+  Future<String> forgotPassword({required String identifier}) async {
+    try {
+      final isEmail = identifier.contains('@');
+      final response = await client.post(
+        ApiConfig.forgotPassword,
+        data: isEmail 
+          ? {'email': identifier.trim()} 
+          : {'phone_number': identifier.trim()},
+      );
+      final data = response.data as Map<String, dynamic>;
+      return data['message'] as String? ?? 'Recovery code sent.';
+    } on DioException catch (e) {
+      final detail = _extractErrorMessage(e);
+      throw AuthException(message: detail, statusCode: e.response?.statusCode);
+    }
+  }
+
+  /// Password Recovery Step 2: Reset Password with OTP
+  /// POST /api/v1/auth/reset-password
+  Future<String> resetPassword({
+    required String identifier,
+    required String code,
+    required String newPassword,
+  }) async {
+    try {
+      final isEmail = identifier.contains('@');
+      final response = await client.post(
+        ApiConfig.resetPassword,
+        data: isEmail
+            ? {
+                'email': identifier.trim(),
+                'code': code.trim(),
+                'new_password': newPassword.trim(),
+              }
+            : {
+                'phone_number': identifier.trim(),
+                'code': code.trim(),
+                'new_password': newPassword.trim(),
+              },
+      );
+      final data = response.data as Map<String, dynamic>;
+      return data['message'] as String? ?? 'Password reset successfully.';
+    } on DioException catch (e) {
+      final detail = _extractErrorMessage(e);
+      throw AuthException(message: detail, statusCode: e.response?.statusCode);
+    }
+  }
+
   /// Session Logout
   /// POST /api/v1/auth/logout
   Future<void> logout() async {

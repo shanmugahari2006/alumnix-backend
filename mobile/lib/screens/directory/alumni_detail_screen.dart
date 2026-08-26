@@ -5,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../models/alumni_profile.dart';
 import '../../providers/alumni_provider.dart';
+import '../../providers/chat_provider.dart';
 import '../../theme/colors.dart';
 import '../../theme/spacing.dart';
 import '../../widgets/app_card.dart';
@@ -361,16 +362,13 @@ class AlumniDetailScreen extends ConsumerWidget {
                 SecondaryButton(
                   text: 'Send Direct Message',
                   icon: Icons.email_outlined,
-                  onPressed: () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(
-                          'Direct messaging channel opened with ${alumni.fullName}.',
-                          style: GoogleFonts.ibmPlexSans(color: Colors.white),
-                        ),
-                        backgroundColor: AppColors.primary,
-                      ),
-                    );
+                  onPressed: () async {
+                    final conv = await ref
+                        .read(conversationsProvider.notifier)
+                        .startConversation(alumni.id);
+                    if (conv != null && context.mounted) {
+                      context.push('/chat/${conv.id}');
+                    }
                   },
                 ),
               ],
