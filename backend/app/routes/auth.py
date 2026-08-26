@@ -16,6 +16,7 @@ from app.utils.security import hash_password, verify_password, create_access_tok
 from app.dependencies import get_current_user, require_role
 from app.services.otp_service import OTPService
 from app.services.email_service import EmailService
+from app.services.notification_service import NotificationService
 from sqlalchemy.orm import selectinload
 
 router = APIRouter()
@@ -423,6 +424,30 @@ async def logout(current_user: User = Depends(get_current_user)):
     Log out the user. The client should discard the local JWT tokens.
     """
     return {"status": "success", "message": "Successfully logged out"}
+
+@router.post("/device-token", status_code=status.HTTP_200_OK)
+async def register_device_token(
+    payload: dict,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
+    token = payload.get("token")
+    if not token:
+        raise HTTPException(status_code=400, detail="Token is required")
+    await NotificationService.register_device_token(db, str(current_user.id), token)
+    return {"status": "success", "message": "Device token registered successfully"}
+
+@router.delete("/device-token", status_code=status.HTTP_200_OK)
+async def unregister_device_token(
+    payload: dict,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
+    token = payload.get("token")
+    if not token:
+        raise HTTPException(status_code=400, detail="Token is required")
+    await NotificationService.unregister_device_token(db, str(current_user.id), token)
+    return {"status": "success", "message": "Device token unregistered successfully"}
 
 @router.patch("/faculty/{faculty_id}/approve", response_model=FacultyResponse)
 async def approve_faculty(

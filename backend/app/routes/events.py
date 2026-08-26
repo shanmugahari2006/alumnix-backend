@@ -1,6 +1,6 @@
 import uuid
 from typing import List
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, status, BackgroundTasks
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.database import get_db
@@ -8,6 +8,7 @@ from app.models.user import User
 from app.models.event import EventRegistration
 from app.schemas.event import EventCreate, EventResponse, EventRegistrationResponse, AttendeeDetail
 from app.services.event_service import EventService
+from app.services.notification_service import NotificationService
 from app.dependencies import get_current_user, require_role
 
 router = APIRouter()
@@ -15,13 +16,25 @@ router = APIRouter()
 @router.post("", response_model=EventResponse, status_code=status.HTTP_201_CREATED)
 async def create_event(
     payload: EventCreate,
+    background_tasks: BackgroundTasks,
     current_user: User = Depends(require_role(["faculty", "admin"])),
     db: AsyncSession = Depends(get_db)
 ):
     """
     Create a new event listing (Faculty and Admin only).
     """
-    return await EventService.create_event(db, payload, current_user.id)
+    event = await EventService.create_event(db, payload, current_user.id)
+    
+    # Broadcast event notification in the background
+    background_tasks.add_task(
+        NotificationService.broadcast_event_created,
+        str(event.id),
+        event.title,
+        current_user.full_name,
+        str(current_user.id)
+    )
+    
+    return event
 
 @router.get("", response_model=List[EventResponse])
 async def list_events(

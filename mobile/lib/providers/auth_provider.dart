@@ -4,6 +4,7 @@ import '../api/dio_client.dart';
 import '../api/secure_storage.dart';
 import '../api/services/auth_service.dart';
 import '../models/user.dart';
+import '../services/push_notification_service.dart';
 
 /// Authentication State Data Class
 @immutable
@@ -132,6 +133,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
           user: user,
           accessToken: token,
         );
+        _initPushNotifications();
       } catch (_) {
         // Failed to hydrate -> clear storage silently and treat as logged out
         await _storage.clearAll();
@@ -177,6 +179,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
         user: user,
         accessToken: accessToken,
       );
+      _initPushNotifications();
       return true;
     } on AuthException catch (e) {
       if (e.isAlumniPending) {
@@ -237,10 +240,19 @@ class AuthNotifier extends StateNotifier<AuthState> {
   Future<void> logout() async {
     state = state.copyWith(isLoading: true);
     try {
+      await PushNotificationService().unregisterTokenWithBackend();
+    } catch (_) {}
+    try {
       await _authService.logout();
     } catch (_) {}
     await _storage.clearAll();
     state = AuthState.unauthenticated();
+  }
+
+  void _initPushNotifications() {
+    final service = PushNotificationService();
+    service.setDioClient(_authService.client);
+    service.initialize();
   }
 }
 

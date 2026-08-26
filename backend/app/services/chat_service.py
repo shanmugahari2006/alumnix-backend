@@ -253,6 +253,19 @@ class ChatService:
         sender_user = s_res.scalars().first()
         sender_name = sender_user.full_name if sender_user else "Unknown"
 
+        # Trigger Push Notification in background
+        import asyncio
+        from app.services.notification_service import NotificationService
+        recipient_id = conv.user_two_id if conv.user_one_id == sender_id else conv.user_one_id
+        asyncio.create_task(
+            NotificationService.send_message_notification(
+                str(recipient_id),
+                sender_name,
+                content,
+                str(conversation_id)
+            )
+        )
+
         return MessageResponse(
             id=message.id,
             conversation_id=message.conversation_id,

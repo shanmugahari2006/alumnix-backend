@@ -1,6 +1,6 @@
 import uuid
 from typing import List
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, status, BackgroundTasks
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.database import get_db
@@ -8,6 +8,7 @@ from app.models.user import User
 from app.models.story import StoryLike
 from app.schemas.story import StoryCreate, StoryResponse, LikeToggleResponse
 from app.services.story_service import StoryService
+from app.services.notification_service import NotificationService
 from app.dependencies import get_current_user, require_role
 
 router = APIRouter()
@@ -15,6 +16,7 @@ router = APIRouter()
 @router.post("", response_model=StoryResponse, status_code=status.HTTP_201_CREATED)
 async def create_story(
     payload: StoryCreate,
+    background_tasks: BackgroundTasks,
     current_user: User = Depends(require_role(["alumni", "admin"])),
     db: AsyncSession = Depends(get_db)
 ):
@@ -22,6 +24,16 @@ async def create_story(
     Create a new success story / promotion (Alumni and Admin only).
     """
     story = await StoryService.create_story(db, payload, current_user.id)
+    
+    # Broadcast notification in background
+    background_tasks.add_task(
+        NotificationService.broadcast_story_created,
+        str(story.id),
+        story.title,
+        current_user.full_name,
+        str(current_user.id)
+    )
+    
     return StoryResponse(
         id=story.id,
         title=story.title,
