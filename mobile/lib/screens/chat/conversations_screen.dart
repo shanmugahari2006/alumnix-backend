@@ -234,7 +234,7 @@ class _ConversationsScreenState extends ConsumerState<ConversationsScreen> {
               contentPadding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 8.0),
               leading: CircleAvatar(
                 radius: 24,
-                backgroundColor: hasUnread ? AppColors.gold : AppColors.goldLight,
+                backgroundColor: hasUnread ? AppColors.secondary : AppColors.goldLight,
                 child: Text(
                   _getInitials(conv.partner.fullName),
                   style: GoogleFonts.ibmPlexSans(

@@ -5,6 +5,8 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/chat_provider.dart';
+import '../../models/chat.dart';
+import '../../models/user.dart';
 import '../../theme/colors.dart';
 import '../../theme/spacing.dart';
 import '../../widgets/loading_skeleton.dart';
