@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="assets/banner.png" alt="Aluminix Banner" width="100%">
+</p>
+
 # Aluminix 🎓
 
 Aluminix is a premium, full-stack, cross-platform ecosystem designed to connect college students, alumni, and faculty members in one seamless, interactive hub. It consists of:
@@ -17,6 +21,20 @@ Aluminix is a premium, full-stack, cross-platform ecosystem designed to connect 
 * **Alumni Success Stories**: Share success updates with likes and community responses.
 * **Push Notifications**: Receive instant alerts for newly created events, messages, or calls even when the app is in the background.
 * **Admin Moderation**: A structured approval flow for alumni and faculty memberships to maintain a verified community.
+
+---
+
+## 📸 Screenshots & Demos
+
+### Web Interface
+<p align="center">
+  <img src="assets/web_screenshot.png" alt="Aluminix Web Dashboard" width="800">
+</p>
+
+### Mobile App (iOS & Android)
+<p align="center">
+  <img src="assets/mobile_screenshot.png" alt="Aluminix Mobile App" width="300">
+</p>
 
 ---
 
