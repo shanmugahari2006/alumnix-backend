@@ -1,10 +1,10 @@
 <p align="center">
-  <img src="assets/banner.jpeg" alt="Aluminix Banner" width="100%">
+  <img src="assets/banner.jpeg" alt="Alumnix Banner" width="100%">
 </p>
 
-# Aluminix 🎓
+# Alumnix 🎓
 
-Aluminix is a premium, full-stack, cross-platform ecosystem designed to connect college students, alumni, and faculty members in one seamless, interactive hub. It consists of:
+Alumnix is a premium, full-stack, cross-platform ecosystem designed to connect college students, alumni, and faculty members in one seamless, interactive hub. It consists of:
 1. **FastAPI Backend (Python)**: A secure, high-performance API managing relational databases, WebSocket rooms, and payments.
 2. **React Web Frontend**: A modern web dashboard for users and administrators.
 3. **Flutter Mobile Frontend (iOS/Android)**: A beautiful, cross-platform mobile application optimized for real-time engagement and calls.
@@ -28,12 +28,12 @@ Aluminix is a premium, full-stack, cross-platform ecosystem designed to connect 
 
 ### Web Interface
 <p align="center">
-  <img src="assets/web_screenshot.png" alt="Aluminix Web Dashboard" width="800">
+  <img src="assets/web_screenshot.png" alt="Alumnix Web Dashboard" width="800">
 </p>
 
 ### Mobile App (iOS & Android)
 <p align="center">
-  <img src="assets/mobile_screenshot.jpeg" alt="Aluminix Mobile App" width="300">
+  <img src="assets/mobile_screenshot.jpeg" alt="Alumnix Mobile App" width="300">
 </p>
 
 ---
@@ -52,7 +52,7 @@ Aluminix is a premium, full-stack, cross-platform ecosystem designed to connect 
 ## 📂 Project Architecture
 
 ```
-Aluminix/
+Alumnix/
 ├── backend/          # FastAPI Python Backend
 │   ├── app/          # Application core (routes, models, services)
 │   └── .env.example  # Configuration variables template
