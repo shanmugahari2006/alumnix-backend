@@ -33,7 +33,7 @@ Aluminix is a premium, full-stack, cross-platform ecosystem designed to connect 
 
 ### Mobile App (iOS & Android)
 <p align="center">
-  <img src="assets/mobile_screenshot.png" alt="Aluminix Mobile App" width="300">
+  <img src="assets/mobile_screenshot.jpeg" alt="Aluminix Mobile App" width="300">
 </p>
 
 ---
