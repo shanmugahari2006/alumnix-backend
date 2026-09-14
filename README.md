@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="assets/banner.png" alt="Aluminix Banner" width="100%">
+  <img src="assets/banner.jpeg" alt="Aluminix Banner" width="100%">
 </p>
 
 # Aluminix 🎓
